@@ -28,3 +28,21 @@ const QString IqWamp::Errors::Timeout = "wamp.error.timeout";
 const QString IqWamp::Errors::NotOwner = "wamp.error.not_owner";
 const QString IqWamp::Errors::NotSubscribed = "wamp.error.not_subscribed";
 const QString IqWamp::Errors::NotFoundTopic = "wamp.error.not_found_topic";
+
+#include <QPointer>
+#include "iqwampabstractcallee.h"
+
+namespace
+{
+class LibraryInitializationObject
+{
+public:
+    LibraryInitializationObject()
+    {
+        qRegisterMetaType<QPointer<IqWampAbstractCallee> >();
+        qRegisterMetaType<QSharedPointer<IqWampRegistration> >();
+    }
+};
+
+LibraryInitializationObject libraryInitializationObject;
+}

@@ -20,6 +20,7 @@
  **********************************************************************************/
 
 #include "iqwamprouter_p.h"
+#include "iqwampcallee.h"
 
 IqWampRouterPrivate::IqWampRouterPrivate(QObject *parent):
     QObject(parent),

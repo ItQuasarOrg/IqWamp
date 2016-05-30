@@ -22,11 +22,11 @@
 
 #include <QObject>
 #include "iqwamp_global.h"
-#include "iqwamplocalclient.h"
 #include "iqwampsubscriptions.h"
 #include "iqwampregistrations.h"
 #include "iqwampbroker.h"
 #include "iqwampdialer.h"
+#include "iqwamplocalclient.h"
 
 class IqWampCallee;
 class IqWampRealmPrivate;

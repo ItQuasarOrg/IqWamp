@@ -20,6 +20,7 @@
  **********************************************************************************/
 
 #include "iqwampregistrations.h"
+#include <QSharedPointer>
 
 IqWampRegistrations::IqWampRegistrations(QObject *parent):
     QObject(parent),
@@ -37,9 +38,9 @@ bool IqWampRegistrations::hasRegistration(int id) const
     return m_registrationsOnId.contains(id);
 }
 
-bool IqWampRegistrations::hasRegistration(const IqWampCallee *callee) const
+bool IqWampRegistrations::hasRegistration(const IqWampAbstractCallee *callee) const
 {
-    return m_registrationsOnCallee.contains(const_cast<IqWampCallee *>(callee));
+    return m_registrationsOnCallee.contains(const_cast<IqWampAbstractCallee *>(callee));
 }
 
 QSharedPointer<IqWampRegistration> IqWampRegistrations::registration(const QString &procedure) const
@@ -52,12 +53,12 @@ QSharedPointer<IqWampRegistration> IqWampRegistrations::registration(int id) con
     return m_registrationsOnId[id];
 }
 
-QSharedPointer<IqWampRegistration> IqWampRegistrations::registration(const IqWampCallee *callee) const
+QSharedPointer<IqWampRegistration> IqWampRegistrations::registration(const IqWampAbstractCallee *callee) const
 {
-    return m_registrationsOnCallee[const_cast<IqWampCallee *>(callee)];
+    return m_registrationsOnCallee[const_cast<IqWampAbstractCallee *>(callee)];
 }
 
-QSharedPointer<IqWampRegistration> IqWampRegistrations::create(const QString &procedure, IqWampCallee *callee)
+QSharedPointer<IqWampRegistration> IqWampRegistrations::create(const QString &procedure, IqWampAbstractCallee *callee)
 {
     int id = m_lastRegistrationId++;
     QSharedPointer<IqWampRegistration> registration (new IqWampRegistration(id, procedure, callee));
@@ -76,7 +77,7 @@ void IqWampRegistrations::remove(int id)
     removeRegistration(registrationToRemove);
 }
 
-void IqWampRegistrations::remove(const IqWampCallee *callee)
+void IqWampRegistrations::remove(const IqWampAbstractCallee *callee)
 {
     if (!hasRegistration(callee))
         return;

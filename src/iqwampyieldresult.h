@@ -19,33 +19,33 @@
  **
  **********************************************************************************/
 
-#ifndef IQWAMPREGISTRATION_H
-#define IQWAMPREGISTRATION_H
+#ifndef IQWAMPYIELDRESULT_H
+#define IQWAMPYIELDRESULT_H
 
-#include <QString>
-#include <QMetaType>
-#include <QSharedPointer>
+#include <QJsonArray>
+#include <QJsonObject>
 
-class IqWampAbstractCallee;
-
-class IqWampRegistration
+class IqWampYieldResult
 {
 public:
-    explicit IqWampRegistration(int id, const QString &procedure, IqWampAbstractCallee *callee);
+    IqWampYieldResult(const QJsonArray &arguments);
+    IqWampYieldResult(const QJsonObject &argumentsKw);
+    IqWampYieldResult(const QJsonArray &arguments, const QJsonObject &argumentsKw);
 
-public:
-    QString procedure() const;
+    QJsonArray arguments() const;
+    void setArguments(const QJsonArray &arguments);
+
+    QJsonObject argumentsKw() const;
+    void setArgumentsKw(const QJsonObject &argumentsKw);
 
     int id() const;
-
-    IqWampAbstractCallee *callee() const;
+    void setId(int id);
 
 private:
-    QString m_procedure;
+    QJsonArray m_arguments;
+    QJsonObject m_argumentsKw;
     int m_id;
-    IqWampAbstractCallee *m_callee;
 };
 
-Q_DECLARE_METATYPE(QSharedPointer<IqWampRegistration>)
 
-#endif //IQWAMPREGISTRATION_H
+#endif //IQWAMPYIELDRESULT_H

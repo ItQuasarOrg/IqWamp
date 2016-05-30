@@ -21,24 +21,16 @@
 
 #include "iqwamplocalclient.h"
 #include "iqwamprealm.h"
+#include "iqwamplocalcallee.h"
 
 IqWampLocalClient::IqWampLocalClient(QObject *parent, IqWampRealm *realm) :
-    QObject(parent),
-    m_realm(realm)
+    IqWampAbstractClient(parent),
+    m_realm(realm),
+    m_callee(new IqWampLocalCallee(this))
 {
 }
 
-bool IqWampLocalClient::publish(const QString &topic, const QJsonObject &argumentsKw)
-{
-    return publish(topic, QJsonArray(), argumentsKw);
-}
-
-bool IqWampLocalClient::publish(const QString &topic, const QJsonArray &arguments)
-{
-    return publish(topic, arguments, QJsonObject());
-}
-
-bool IqWampLocalClient::publish(const QString &topic, const QJsonArray &arguments, const QJsonObject &argumentsKw)
+bool IqWampLocalClient::publishEvent(const QString &topic, const QJsonArray &arguments, const QJsonObject &argumentsKw)
 {
     IqWampSubscriptions *subscriptions = m_realm->subscriptions();
     if (!subscriptions->hasSubscription(topic))
@@ -50,5 +42,27 @@ bool IqWampLocalClient::publish(const QString &topic, const QJsonArray &argument
     broker->publish(subscription, arguments, argumentsKw);
 
     return true;
+}
+
+IqWampRealm *IqWampLocalClient::realm() const
+{
+    return m_realm;
+}
+
+bool IqWampLocalClient::registerProcedureCallback(const QString &procedure,
+                                                  std::function<IqWampYieldResult(const QJsonArray &,
+                                                                                  const QJsonObject &)> callback)
+{
+    IqWampRegistrations *registrations = m_realm->registrations();
+    if (registrations->hasRegistration(procedure))
+        return false;
+
+//    QJsonArray jsonArray;
+//    QJsonObject jsonObject;
+
+    if (!m_callee->registerProcedure(procedure, callback))
+        return false;
+
+    return registrations->create(procedure, m_callee).data() != Q_NULLPTR;
 }
 

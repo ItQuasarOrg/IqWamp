@@ -19,33 +19,14 @@
  **
  **********************************************************************************/
 
-#ifndef IQWAMPREGISTRATION_H
-#define IQWAMPREGISTRATION_H
+#include "iqwampabstractcallee.h"
 
-#include <QString>
-#include <QMetaType>
-#include <QSharedPointer>
-
-class IqWampAbstractCallee;
-
-class IqWampRegistration
+IqWampAbstractCallee::IqWampAbstractCallee(QObject *parent) :
+    QObject(parent)
 {
-public:
-    explicit IqWampRegistration(int id, const QString &procedure, IqWampAbstractCallee *callee);
+}
 
-public:
-    QString procedure() const;
+IqWampAbstractCallee::~IqWampAbstractCallee()
+{
+}
 
-    int id() const;
-
-    IqWampAbstractCallee *callee() const;
-
-private:
-    QString m_procedure;
-    int m_id;
-    IqWampAbstractCallee *m_callee;
-};
-
-Q_DECLARE_METATYPE(QSharedPointer<IqWampRegistration>)
-
-#endif //IQWAMPREGISTRATION_H

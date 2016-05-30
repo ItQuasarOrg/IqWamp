@@ -23,7 +23,8 @@
 #define IQWAMPREGISTRATIONS_H
 
 #include <QObject>
-#include "iqwampcallee.h"
+#include <QHash>
+#include "iqwampabstractcallee.h"
 #include "iqwampregistration.h"
 
 class IqWampRegistrations : public QObject
@@ -33,21 +34,21 @@ public:
     explicit IqWampRegistrations(QObject *parent = 0);
     bool hasRegistration(const QString &procedure) const;
     bool hasRegistration(int id) const;
-    bool hasRegistration(const IqWampCallee *callee) const;
+    bool hasRegistration(const IqWampAbstractCallee *callee) const;
 
     QSharedPointer<IqWampRegistration> registration(const QString &procedure) const;
     QSharedPointer<IqWampRegistration> registration(int id) const;
-    QSharedPointer<IqWampRegistration> registration(const IqWampCallee *callee) const;
+    QSharedPointer<IqWampRegistration> registration(const IqWampAbstractCallee *callee) const;
 
-    QSharedPointer<IqWampRegistration> create(const QString &procedure, IqWampCallee *callee);
+    QSharedPointer<IqWampRegistration> create(const QString &procedure, IqWampAbstractCallee *callee);
 
     void remove(int id);
-    void remove(const IqWampCallee *callee);
+    void remove(const IqWampAbstractCallee *callee);
 private:
     int m_lastRegistrationId;
     QHash<QString, QSharedPointer<IqWampRegistration> > m_registrationsOnProcedure;
     QHash<int, QSharedPointer<IqWampRegistration> > m_registrationsOnId;
-    QHash<IqWampCallee *, QSharedPointer<IqWampRegistration> > m_registrationsOnCallee;
+    QHash<IqWampAbstractCallee *, QSharedPointer<IqWampRegistration> > m_registrationsOnCallee;
 
     void removeRegistration(const QSharedPointer<IqWampRegistration> &registration);
 };

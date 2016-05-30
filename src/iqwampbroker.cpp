@@ -20,6 +20,7 @@
  **********************************************************************************/
 
 #include "iqwampbroker.h"
+#include "iqwampabstractcallee.h"
 
 IqWampBroker::IqWampBroker(QObject *parent):
     QObject(parent),
@@ -32,8 +33,8 @@ int IqWampBroker::publish(const QSharedPointer<IqWampSubscription> &subscription
                           const QJsonObject &argumentsKw)
 {
     int publicationId = m_lastPublicationId++;
-    for(IqWampCallee *client: subscription->callees()) {
-        client->publishEvent(subscription->id(), publicationId, arguments, argumentsKw);
+    for(IqWampAbstractCallee *client: subscription->callees()) {
+        client->sendEvent(subscription, publicationId, arguments, argumentsKw);
     }
 
     return publicationId;

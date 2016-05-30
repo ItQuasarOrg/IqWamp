@@ -27,23 +27,42 @@
 #include <QTimer>
 #include <QHash>
 #include "iqwamp.h"
+#include "iqwampabstractcallee.h"
 
 class IqWampRealm;
 class IqWampCalleePrivate;
 
-class IqWampCallee: public QObject
+class IqWampCallee: public IqWampAbstractCallee
 {
     Q_OBJECT
 public:
     explicit IqWampCallee(QWebSocket *socket, QObject *parent = 0);
+
+    virtual ~IqWampCallee();
 
     void sendWelcome();
     void sendAbort(const QString &reason, const QJsonObject &details = QJsonObject());
 
     void closeConnection();
 
-    void publishEvent(int subscriptionId, int publicationId, const QJsonArray &arguments, const QJsonObject &argumentsKw);
-    void call(int registrationId, int invocationId, const QJsonArray &arguments, const QJsonObject &argumentsKw);
+    virtual void sendEvent(const QSharedPointer<IqWampSubscription> &subscription,
+                           int publicationId,
+                           const QJsonArray &arguments,
+                           const QJsonObject &argumentsKw) Q_DECL_OVERRIDE;
+
+    virtual void sendInvocation(const QSharedPointer<IqWampRegistration> &registration,
+                                int invocationId,
+                                const QJsonArray &arguments,
+                                const QJsonObject &argumentsKw) Q_DECL_OVERRIDE;
+
+    virtual void sendResult(int callId,
+                            const QJsonObject &details,
+                            const QJsonArray &arguments,
+                            const QJsonObject &argumentsKw) Q_DECL_OVERRIDE;
+
+    void sendCallError(int callId,
+                       const QString &error,
+                       const QJsonObject &details = QJsonObject()) Q_DECL_OVERRIDE;
 
 signals:
     void disconnected();
@@ -86,16 +105,7 @@ private:
     QString m_sessionId;
     IqWampRealm *m_realm;
 
-    int m_callIdleInterval;
-    QSet<QTimer *> m_callIdleTimers;
-
-    class IqWampCallFuture
-    {
-    public:
-        QJsonValue callRequest;
-        QSharedPointer<QTimer> idleTimer;
-    };
-    QHash<int, IqWampCallFuture> m_callFutures;
+    QHash<int, QJsonValue> m_callRequests;
 };
 
 #endif //IQWAMPSERVERCLIENT_H

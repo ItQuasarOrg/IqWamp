@@ -19,23 +19,84 @@
  **
  **********************************************************************************/
 
+#define DEFAULT_CALL_IDLE_INTERVAL 3000
+
 #include "iqwampdialer.h"
+#include "iqwampabstractcallee.h"
+#include "iqwampcallee.h"
+
+IqWampDialer::IqWampInvocationFuture::IqWampInvocationFuture():
+    invocationId(0),
+    sender(Q_NULLPTR),
+    idleTimer(new QTimer())
+{
+}
+
+IqWampDialer::IqWampInvocationFuture::IqWampInvocationFuture(int invocationId, IqWampAbstractCallee *sender):
+    invocationId(invocationId),
+    sender(sender),
+    idleTimer(new QTimer())
+{
+}
 
 IqWampDialer::IqWampDialer(QObject *parent):
     QObject(parent),
-    m_lastInvocationId(0)
+    m_lastInvocationId(0),
+    m_callIdleInterval(DEFAULT_CALL_IDLE_INTERVAL)
 {
 }
 
 int IqWampDialer::call(const QSharedPointer<IqWampRegistration> &registration,
                        const QJsonArray &arguments,
-                       const QJsonObject &argumentsKw)
+                       const QJsonObject &argumentsKw,
+                       IqWampAbstractCallee *sender)
 {
     int invocationId = m_lastInvocationId++;
-    IqWampCallee *client = registration->callee();
-    client->call(registration->id(), invocationId, arguments, argumentsKw);
+
+    IqWampInvocationFuture callFuture (invocationId, sender);
+    connect(callFuture.idleTimer.data(), &QTimer::timeout, this, [callFuture, this](){
+        m_invocationFutures.remove(callFuture.invocationId);
+
+        if (callFuture.sender)
+            callFuture.sender->sendCallError(callFuture.invocationId, IqWamp::Errors::Timeout);
+    });
+    m_invocationFutures[invocationId] = callFuture;
+    callFuture.idleTimer->start(m_callIdleInterval);
+
+    IqWampAbstractCallee *callee = registration->callee();
+
+    QMetaObject::invokeMethod(this,
+                              "sendInvocation",
+                              Qt::QueuedConnection,
+                              Q_ARG(QPointer<IqWampAbstractCallee>, QPointer<IqWampAbstractCallee>(callee)),
+                              Q_ARG(const QSharedPointer<IqWampRegistration> &, registration),
+                              Q_ARG(int, invocationId),
+                              Q_ARG(const QJsonArray &, arguments),
+                              Q_ARG(const QJsonObject &, argumentsKw));
 
     return invocationId;
+}
+
+void IqWampDialer::processYield(const QSharedPointer<IqWampRegistration> &registration,
+                                const IqWampYieldResult &result)
+{
+    if (!m_invocationFutures.contains(result.id()))
+        return;
+
+    IqWampInvocationFuture callFuture = m_invocationFutures.take(result.id());
+    callFuture.idleTimer->stop();
+
+    if (callFuture.sender)
+        callFuture.sender->sendResult(result.id(), QJsonObject(), result.arguments(), result.argumentsKw());
+}
+
+void IqWampDialer::sendInvocation(QPointer<IqWampAbstractCallee> callee,
+                                  const QSharedPointer<IqWampRegistration> &registration,
+                                  int invocationId,
+                                  const QJsonArray &arguments,
+                                  const QJsonObject &argumentsKw)
+{
+    callee->sendInvocation(registration, invocationId, arguments, argumentsKw);
 }
 
 

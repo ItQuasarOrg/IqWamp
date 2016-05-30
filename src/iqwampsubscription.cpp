@@ -20,8 +20,9 @@
  **********************************************************************************/
 
 #include "iqwampsubscription.h"
+#include "iqwampabstractcallee.h"
 
-IqWampSubscription::IqWampSubscription(int id, const QString &topic, IqWampCallee *callee):
+IqWampSubscription::IqWampSubscription(int id, const QString &topic, IqWampAbstractCallee *callee):
     m_topic(topic),
     m_id(id)
 {
@@ -38,22 +39,22 @@ int IqWampSubscription::id() const
     return m_id;
 }
 
-bool IqWampSubscription::hasCallee(const IqWampCallee *callee) const
+bool IqWampSubscription::hasCallee(const IqWampAbstractCallee *callee) const
 {
-    return m_callees.contains(const_cast<IqWampCallee *>(callee));
+    return m_callees.contains(const_cast<IqWampAbstractCallee *>(callee));
 }
 
-void IqWampSubscription::addCallee(IqWampCallee *callee)
+void IqWampSubscription::addCallee(IqWampAbstractCallee *callee)
 {
     m_callees.insert(callee);
 }
 
-void IqWampSubscription::removeCallee(const IqWampCallee *callee)
+void IqWampSubscription::removeCallee(const IqWampAbstractCallee *callee)
 {
-    m_callees.remove(const_cast<IqWampCallee *>(callee));
+    m_callees.remove(const_cast<IqWampAbstractCallee *>(callee));
 }
 
-QSet<IqWampCallee *> IqWampSubscription::callees() const
+QSet<IqWampAbstractCallee *> IqWampSubscription::callees() const
 {
     return m_callees;
 }

@@ -23,7 +23,8 @@
 #define IQWAMPSUBSCRIPTIONS_H
 
 #include <QObject>
-#include "iqwampcallee.h"
+#include <QHash>
+#include "iqwampabstractcallee.h"
 #include "iqwampsubscription.h"
 
 class IqWampSubscriptions : public QObject
@@ -38,9 +39,9 @@ public:
     QSharedPointer<IqWampSubscription> subscription(const QString &topic) const;
     QSharedPointer<IqWampSubscription> subscription(int id) const;
 
-    QSharedPointer<IqWampSubscription> create(const QString &topic, IqWampCallee *callee);
+    QSharedPointer<IqWampSubscription> create(const QString &topic, IqWampAbstractCallee *callee);
 
-    void remove(const IqWampCallee *callee);
+    void remove(const IqWampAbstractCallee *callee);
 private:
     int m_lastSubscriptionId;
 

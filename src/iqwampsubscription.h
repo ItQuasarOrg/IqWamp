@@ -23,26 +23,28 @@
 #define IQWAMPSUBSCRIPTION_H
 
 #include <QString>
-#include "iqwampcallee.h"
+#include <QSet>
+
+class IqWampAbstractCallee;
 
 class IqWampSubscription
 {
 public:
-    IqWampSubscription(int id, const QString &topic, IqWampCallee *callee);
+    IqWampSubscription(int id, const QString &topic, IqWampAbstractCallee *callee);
 
     QString topic() const;
 
     int id() const;
 
-    bool hasCallee(const IqWampCallee *callee) const;
-    void addCallee(IqWampCallee *callee);
-    void removeCallee(const IqWampCallee *callee);
-    QSet<IqWampCallee *> callees() const;
+    bool hasCallee(const IqWampAbstractCallee *callee) const;
+    void addCallee(IqWampAbstractCallee *callee);
+    void removeCallee(const IqWampAbstractCallee *callee);
+    QSet<IqWampAbstractCallee *> callees() const;
 
 private:
     QString m_topic;
     int m_id;
-    QSet<IqWampCallee *> m_callees;
+    QSet<IqWampAbstractCallee *> m_callees;
 
 };
 

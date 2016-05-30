@@ -22,13 +22,19 @@
 #include <QUuid>
 #include <QJsonDocument>
 
+
 IqWampCallee::IqWampCallee(QWebSocket *socket, QObject *parent):
-    QObject(parent),
+    IqWampAbstractCallee(parent),
     m_socket(socket)
 {
     socket->setParent(this);
     connect(socket, &QWebSocket::disconnected, this, &IqWampCallee::disconnected);
     connect(socket, &QWebSocket::textMessageReceived, this, &IqWampCallee::processTextMessage);
+}
+
+IqWampCallee::~IqWampCallee()
+{
+
 }
 
 void IqWampCallee::processTextMessage(const QString &message)
@@ -115,6 +121,10 @@ void IqWampCallee::processTextMessage(const QString &message)
             processUnRegister(messageArray);
             break;
         }
+        case IqWamp::MessageTypes::Call: {
+            processCall(messageArray);
+            break;
+        }
 
         default: {
 #ifdef IQWAMP_DEBUG_MODE
@@ -142,14 +152,17 @@ QString IqWampCallee::messageTypeName(IqWamp::MessageTypes messageType)
         default: return QStringLiteral("unknown_message_type");
     }
 
-    return "unknown_message_type";;
+    return "unknown_message_type";
 }
 
-void IqWampCallee::publishEvent(int subscriptionId, int publicationId, const QJsonArray &arguments, const QJsonObject &argumentsKw)
+void IqWampCallee::sendEvent(const QSharedPointer<IqWampSubscription> &subscription,
+                             int publicationId,
+                             const QJsonArray &arguments,
+                             const QJsonObject &argumentsKw)
 {
     QJsonArray message;
     message.append(static_cast<int>(IqWamp::MessageTypes::Event));
-    message.append(subscriptionId);
+    message.append(subscription->id());
     message.append(publicationId);
     message.append(QJsonObject());
     if (!arguments.isEmpty() || !argumentsKw.isEmpty())
@@ -420,7 +433,7 @@ void IqWampCallee::processCall(const QJsonArray &jsonMessage)
 #endif
                 return;
             }
-            argumentsKw = jsonMessage.at(4).toObject();
+            argumentsKw = jsonMessage.at(5).toObject();
         }
     }
 
@@ -435,19 +448,9 @@ void IqWampCallee::processCall(const QJsonArray &jsonMessage)
 
     QSharedPointer<IqWampRegistration> registration = registrations->registration(procedure);
 
-    int invocationId = m_realm->dialer()->call(registration, arguments, argumentsKw);
+    int callId = m_realm->dialer()->call(registration, arguments, argumentsKw, this);
 
-    IqWampCallFuture callFuture;
-    callFuture.callRequest = request;
-
-//    connect(callFuture.idleTimer.data(), &QTimer::timeout, this, [request, invocationId, callFuture, m_callFutures, this](){
-//        m_callFutures.remove(invocationId);
-//
-//        sendError(IqWamp::MessageTypes::Call, request, IqWamp::Errors::Timeout);
-//    });
-    m_callFutures[invocationId] = callFuture;
-
-    callFuture.idleTimer->start(m_callIdleInterval);
+    m_callRequests[callId] = request;
 }
 
 void IqWampCallee::processPublish(const QJsonArray &jsonMessage)
@@ -513,11 +516,44 @@ void IqWampCallee::setRealm(IqWampRealm *realm)
     m_realm = realm;
 }
 
-void IqWampCallee::call(int registrationId,
-                        int invocationId,
-                        const QJsonArray &arguments,
-                        const QJsonObject &argumentsKw)
+void IqWampCallee::sendInvocation(const QSharedPointer<IqWampRegistration> &registration,
+                                  int invocationId,
+                                  const QJsonArray &arguments,
+                                  const QJsonObject &argumentsKw)
 {
 
 }
+
+void IqWampCallee::sendResult(int callId,
+                              const QJsonObject &details,
+                              const QJsonArray &arguments,
+                              const QJsonObject &argumentsKw)
+{
+    if(!m_callRequests.contains(callId))
+        return;
+
+    QJsonValue request = m_callRequests.take(callId);
+    QJsonArray message;
+    message.append(static_cast<int>(IqWamp::MessageTypes::Result));
+    message.append(request);
+    message.append(details);
+    if (!arguments.isEmpty() || !argumentsKw.isEmpty())
+        message.append(arguments);
+    if (!argumentsKw.isEmpty())
+        message.append(argumentsKw);
+
+    send(message);
+}
+
+void IqWampCallee::sendCallError(int callId, const QString &error, const QJsonObject &details)
+{
+    if(!m_callRequests.contains(callId))
+        return;
+
+    QJsonValue request = m_callRequests.take(callId);
+
+    sendError(IqWamp::MessageTypes::Call, request, error, details);
+}
+
+
 

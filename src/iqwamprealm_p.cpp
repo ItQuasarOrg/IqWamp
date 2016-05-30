@@ -20,6 +20,8 @@
  **********************************************************************************/
 
 #include "iqwamprealm_p.h"
+#include "iqwamplocalclient.h"
+#include "iqwampcallee.h"
 
 IqWampRealmPrivate::IqWampRealmPrivate(IqWampRealm *parent):
     QObject(parent),
@@ -81,7 +83,7 @@ void IqWampRealmPrivate::onClientDisconnected()
 //    m_clientSubscription.remove(subscriptionId, client);
 //}
 //
-//void IqWampRealmPrivate::publishEvent(int subscriptionId,
+//void IqWampRealmPrivate::sendEvent(int subscriptionId,
 //                                      int publicationId,
 //                                      const QJsonArray &arguments,
 //                                      const QJsonObject &argumentsKw)
@@ -89,7 +91,7 @@ void IqWampRealmPrivate::onClientDisconnected()
 //    QList<IqWampCallee *> clientsToSend = m_clientSubscription.values(subscriptionId);
 //
 //    for(IqWampCallee *client: clientsToSend) {
-//        client->publishEvent(subscriptionId, publicationId, arguments, argumentsKw);
+//        client->sendEvent(subscriptionId, publicationId, arguments, argumentsKw);
 //    }
 //}
 
@@ -102,7 +104,7 @@ void IqWampRealmPrivate::addClient(IqWampCallee *client)
 
 //    connect(client, &IqWampCallee::subscribed, this, &IqWampRealmPrivate::onClientSubscribed);
 //    connect(client, &IqWampCallee::unSubscribed, this, &IqWampRealmPrivate::onClientUnSubscribed);
-//    connect(client, &IqWampCallee::publish, this, &IqWampRealmPrivate::publishEvent);
+//    connect(client, &IqWampCallee::publish, this, &IqWampRealmPrivate::sendEvent);
 //
 //    connect(client, &IqWampCallee::registered, this, &IqWampRealmPrivate::onClientRegistered);
 }
@@ -160,7 +162,7 @@ void IqWampRealmPrivate::addClient(IqWampCallee *client)
 //    int subscription = subscriptionId(topic);
 //    int publicationId = newPublicationId();
 //
-//    publishEvent(subscription, publicationId, QJsonArray(), argumentsKw);
+//    sendEvent(subscription, publicationId, QJsonArray(), argumentsKw);
 //}
 
 IqWampSubscriptions *IqWampRealmPrivate::subscriptions() const

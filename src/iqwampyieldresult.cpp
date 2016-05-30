@@ -19,33 +19,53 @@
  **
  **********************************************************************************/
 
-#ifndef IQWAMPREGISTRATION_H
-#define IQWAMPREGISTRATION_H
+#include "iqwampyieldresult.h"
 
-#include <QString>
-#include <QMetaType>
-#include <QSharedPointer>
-
-class IqWampAbstractCallee;
-
-class IqWampRegistration
+IqWampYieldResult::IqWampYieldResult(const QJsonArray &arguments):
+    m_arguments(arguments),
+    m_id(0)
 {
-public:
-    explicit IqWampRegistration(int id, const QString &procedure, IqWampAbstractCallee *callee);
+}
 
-public:
-    QString procedure() const;
+IqWampYieldResult::IqWampYieldResult(const QJsonObject &argumentsKw):
+    m_argumentsKw(argumentsKw),
+    m_id(0)
+{
+}
 
-    int id() const;
+IqWampYieldResult::IqWampYieldResult(const QJsonArray &arguments, const QJsonObject &argumentsKw):
+    m_arguments(arguments),
+    m_argumentsKw(argumentsKw),
+    m_id(0)
+{
+}
 
-    IqWampAbstractCallee *callee() const;
+QJsonArray IqWampYieldResult::arguments() const
+{
+    return m_arguments;
+}
 
-private:
-    QString m_procedure;
-    int m_id;
-    IqWampAbstractCallee *m_callee;
-};
+void IqWampYieldResult::setArguments(const QJsonArray &arguments)
+{
+    m_arguments = arguments;
+}
 
-Q_DECLARE_METATYPE(QSharedPointer<IqWampRegistration>)
+QJsonObject IqWampYieldResult::argumentsKw() const
+{
+    return m_argumentsKw;
+}
 
-#endif //IQWAMPREGISTRATION_H
+void IqWampYieldResult::setArgumentsKw(const QJsonObject &argumentsKw)
+{
+    m_argumentsKw = argumentsKw;
+}
+
+int IqWampYieldResult::id() const
+{
+    return m_id;
+}
+
+void IqWampYieldResult::setId(int id)
+{
+    m_id = id;
+}

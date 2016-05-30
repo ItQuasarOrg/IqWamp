@@ -22,24 +22,29 @@
 #ifndef IQWAMPLOCALCLIENT_H
 #define IQWAMPLOCALCLIENT_H
 
-#include <QObject>
+#include "iqwampabstractclient.h"
 #include "iqwamp_global.h"
 
 class IqWampRealm;
+class IqWampLocalCallee;
 
-class IQWAMPSHARED_EXPORT IqWampLocalClient: public QObject
+class IQWAMPSHARED_EXPORT IqWampLocalClient: public IqWampAbstractClient
 {
     Q_OBJECT
 public:
     explicit IqWampLocalClient(QObject *parent, IqWampRealm *realm);
 
-    bool publish(const QString &topic, const QJsonObject &argumentsKw);
-    bool publish(const QString &topic, const QJsonArray &arguments);
-    bool publish(const QString &topic, const QJsonArray &arguments, const QJsonObject &argumentsKw);
+protected:
+    virtual bool publishEvent(const QString &topic, const QJsonArray &arguments, const QJsonObject &argumentsKw) Q_DECL_OVERRIDE;
+
+    virtual bool registerProcedureCallback(const QString &procedure, std::function<IqWampYieldResult (const QJsonArray &, const QJsonObject &)> callback) Q_DECL_OVERRIDE;
+
+public:
+    IqWampRealm *realm() const;
 
 private:
     IqWampRealm *m_realm;
+    IqWampLocalCallee *m_callee;
 };
-
 
 #endif //IQWAMPLOCALCLIENT_H

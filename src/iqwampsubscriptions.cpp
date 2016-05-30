@@ -20,6 +20,7 @@
  **********************************************************************************/
 
 #include "iqwampsubscriptions.h"
+#include <QSharedPointer>
 
 IqWampSubscriptions::IqWampSubscriptions(QObject *parent):
     QObject(parent),
@@ -47,7 +48,7 @@ QSharedPointer<IqWampSubscription> IqWampSubscriptions::subscription(int id) con
     return m_subscriptionOnId[id];
 }
 
-QSharedPointer<IqWampSubscription> IqWampSubscriptions::create(const QString &topic, IqWampCallee *callee)
+QSharedPointer<IqWampSubscription> IqWampSubscriptions::create(const QString &topic, IqWampAbstractCallee *callee)
 {
     int id = m_lastSubscriptionId++;
     QSharedPointer<IqWampSubscription> subscription (new IqWampSubscription(id, topic, callee));
@@ -56,7 +57,7 @@ QSharedPointer<IqWampSubscription> IqWampSubscriptions::create(const QString &to
     return subscription;
 }
 
-void IqWampSubscriptions::remove(const IqWampCallee *callee)
+void IqWampSubscriptions::remove(const IqWampAbstractCallee *callee)
 {
     for(QSharedPointer<IqWampSubscription> &subscription: m_subscriptionOnId.values()) {
        subscription->removeCallee(callee);

@@ -20,8 +20,9 @@
  **********************************************************************************/
 
 #include "iqwampregistration.h"
+#include "iqwampabstractcallee.h"
 
-IqWampRegistration::IqWampRegistration(int id, const QString &procedure, IqWampCallee *callee):
+IqWampRegistration::IqWampRegistration(int id, const QString &procedure, IqWampAbstractCallee *callee):
     m_procedure(procedure),
     m_id(id),
     m_callee(callee)
@@ -38,7 +39,7 @@ int IqWampRegistration::id() const
     return m_id;
 }
 
-IqWampCallee * IqWampRegistration::callee() const
+IqWampAbstractCallee * IqWampRegistration::callee() const
 {
     return m_callee;
 }
