@@ -83,6 +83,8 @@ private:
     void send(const QJsonArray &message);
     void sendError(IqWamp::MessageTypes requestType, const QJsonValue &request, const QString &error, const QJsonObject &details = QJsonObject());
 
+    void processHello(const QJsonArray &jsonMessage);
+
     void processSubscribe(const QJsonArray &jsonMessage);
     void sendSubscribed(const QJsonValue &request, int subscriptionId);
 

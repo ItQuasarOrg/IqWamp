@@ -66,3 +66,10 @@ bool IqWampLocalClient::registerProcedureCallback(const QString &procedure,
     return registrations->create(procedure, m_callee).data() != Q_NULLPTR;
 }
 
+bool IqWampLocalClient::subscribeToTopic(const QString &topic,
+                                         const QJsonObject &options,
+                                         std::function<void(const QJsonArray &, const QJsonObject &)> callback)
+{
+    return false;
+}
+

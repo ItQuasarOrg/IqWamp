@@ -72,3 +72,63 @@ bool IqWampAbstractClient::registerProcedure(const QString &procedure, std::func
 
     return registerProcedureCallback(procedure, callbackFunction);
 }
+
+bool IqWampAbstractClient::subscribe(const QString &topic,
+                                     std::function<void(const QJsonArray &,
+                                                        const QJsonObject &)>&& callback)
+{
+    return subscribeToTopic(topic, QJsonObject(), callback);
+}
+
+bool IqWampAbstractClient::subscribe(const QString &topic,
+                                     const QJsonObject &options,
+                                     std::function<void(const QJsonArray &,
+                                                        const QJsonObject &)>&& callback)
+{
+    return subscribeToTopic(topic, options, callback);
+}
+
+bool IqWampAbstractClient::subscribe(const QString &topic,
+                                     std::function<void(const QJsonArray &)>&& callback)
+{
+    std::function<void (const QJsonArray &, const QJsonObject &)> callbackFunction = std::bind(callback, std::placeholders::_1);
+    return subscribeToTopic(topic, QJsonObject(), callbackFunction);
+}
+
+bool IqWampAbstractClient::subscribe(const QString &topic,
+                                     const QJsonObject &options,
+                                     std::function<void(const QJsonArray &)>&& callback)
+{
+    std::function<void (const QJsonArray &, const QJsonObject &)> callbackFunction = std::bind(callback, std::placeholders::_1);
+    return subscribeToTopic(topic, options, callbackFunction);
+}
+
+bool IqWampAbstractClient::subscribe(const QString &topic,
+                                     std::function<void(const QJsonObject &)>&& callback)
+{
+    std::function<void (const QJsonArray &, const QJsonObject &)> callbackFunction = std::bind(callback, std::placeholders::_2);
+    return subscribeToTopic(topic, QJsonObject(), callbackFunction);
+}
+
+bool IqWampAbstractClient::subscribe(const QString &topic,
+                                     const QJsonObject &options,
+                                     std::function<void(const QJsonObject &)>&& callback)
+{
+    std::function<void (const QJsonArray &, const QJsonObject &)> callbackFunction = std::bind(callback, std::placeholders::_2);
+    return subscribeToTopic(topic, options, callbackFunction);
+}
+
+bool IqWampAbstractClient::subscribe(const QString &topic,
+                                     std::function<void()>&& callback)
+{
+    std::function<void (const QJsonArray &, const QJsonObject &)> callbackFunction = std::bind(callback);
+    return subscribeToTopic(topic, QJsonObject(), callbackFunction);
+}
+
+bool IqWampAbstractClient::subscribe(const QString &topic,
+                                     const QJsonObject &options,
+                                     std::function<void()>&& callback)
+{
+    std::function<void (const QJsonArray &, const QJsonObject &)> callbackFunction = std::bind(callback);
+    return subscribeToTopic(topic, options, callbackFunction);
+}

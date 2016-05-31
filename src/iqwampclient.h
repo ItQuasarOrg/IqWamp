@@ -2,37 +2,42 @@
  **
  ** Copyright © 2016 Pavel A. Puchkov 
  **
- ** This file is part of IqWamp.
+ ** This file is part of IqMeteoGui. 
  **
- ** IqWamp is free software: you can redistribute it and/or modify
+ ** IqMeteoGui is free software: you can redistribute it and/or modify
  ** it under the terms of the GNU Lesser General Public License as published by
  ** the Free Software Foundation, either version 3 of the License, or
  ** (at your option) any later version.
  **
- ** IqWamp is distributed in the hope that it will be useful,
+ ** IqMeteoGui is distributed in the hope that it will be useful,
  ** but WITHOUT ANY WARRANTY; without even the implied warranty of
  ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  ** GNU Lesser General Public License for more details.
  **
  ** You should have received a copy of the GNU Lesser General Public License
- ** along with IqWamp.  If not, see <http://www.gnu.org/licenses/>.
+ ** along with IqMeteoGui.  If not, see <http://www.gnu.org/licenses/>.
  **
  **********************************************************************************/
 
-#ifndef IQWAMPLOCALCLIENT_H
-#define IQWAMPLOCALCLIENT_H
+#ifndef IQWAMPCLIENT_H
+#define IQWAMPCLIENT_H
 
 #include "iqwampabstractclient.h"
-#include "iqwamp_global.h"
+#include <QScopedPointer>
 
-class IqWampRealm;
-class IqWampLocalCallee;
+class IqWampClientPrivate;
 
-class IQWAMPSHARED_EXPORT IqWampLocalClient: public IqWampAbstractClient
+class IqWampClient: public IqWampAbstractClient
 {
     Q_OBJECT
+    Q_DECLARE_PRIVATE(IqWampClient)
 public:
-    explicit IqWampLocalClient(QObject *parent, IqWampRealm *realm);
+    explicit IqWampClient(QObject *parent = 0);
+
+    bool open(const QString &url, const QString &realm);
+
+signals:
+    void opened();
 
 protected:
     virtual bool subscribeToTopic(const QString &topic,
@@ -43,12 +48,9 @@ protected:
 
     virtual bool registerProcedureCallback(const QString &procedure, std::function<IqWampYieldResult (const QJsonArray &, const QJsonObject &)> callback) Q_DECL_OVERRIDE;
 
-public:
-    IqWampRealm *realm() const;
-
 private:
-    IqWampRealm *m_realm;
-    IqWampLocalCallee *m_callee;
+    IqWampClientPrivate * const d_ptr;
 };
 
-#endif //IQWAMPLOCALCLIENT_H
+
+#endif //IQMETEOGUI_IQWAMPCLIENT_H

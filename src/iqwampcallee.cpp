@@ -19,6 +19,7 @@
 
 #include "iqwampcallee.h"
 #include "iqwamprealm.h"
+#include "iqwampjsonwebsockethelper.h"
 #include <QUuid>
 #include <QJsonDocument>
 
@@ -39,57 +40,15 @@ IqWampCallee::~IqWampCallee()
 
 void IqWampCallee::processTextMessage(const QString &message)
 {
-#ifdef IQWAMP_DEBUG_MODE
-    qDebug() << "Reserve message" << message;
-#endif
+    QJsonArray messageArray = QJsonArray();
+    IqWamp::MessageTypes messageType;
 
-    QJsonParseError error;
-    QJsonDocument messageDoc = QJsonDocument::fromJson(message.toLocal8Bit(), &error);
-
-    if (error.error) {
-#ifdef IQWAMP_DEBUG_MODE
-        qWarning() << "Message is not formatted correctly! Error: " << error.errorString();
-#endif
+    if (!IqWampJsonWebSocketHelper::parseMessage(message, &messageArray, &messageType))
         return;
-    }
-
-    if (!messageDoc.isArray()) {
-#ifdef IQWAMP_DEBUG_MODE
-        qWarning() << "Message is not formatted correctly! Message must be JSON array.";
-#endif
-        return;
-    }
-
-    QJsonArray messageArray = messageDoc.array();
-    if (messageArray.size() < 2) {
-#ifdef IQWAMP_DEBUG_MODE
-        qWarning() << "Message is not formatted correctly! Message must be JSON array with size >= 2.";
-#endif
-        return;
-    }
-
-    QJsonValue messageFirstParam = messageArray.first();
-    if (!messageFirstParam.isDouble()) {
-#ifdef IQWAMP_DEBUG_MODE
-        qWarning() << "Message is not formatted correctly! Message must be JSON array with first int value.";
-#endif
-        return;
-    }
-
-    IqWamp::MessageTypes messageType = static_cast<IqWamp::MessageTypes>(messageFirstParam.toInt());
 
     switch (messageType) {
         case IqWamp::MessageTypes::Hello: {
-            QJsonValue messageSecondParam = messageArray.at(1);
-
-            if (!messageSecondParam.isString()) {
-#ifdef IQWAMP_DEBUG_MODE
-                qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! Second value on message array must be string.";
-#endif
-                return;
-            }
-
-            emit hello(messageSecondParam.toString());
+            processHello(messageArray);
         }
             break;
         case IqWamp::MessageTypes::Welcome:
@@ -135,24 +94,24 @@ void IqWampCallee::processTextMessage(const QString &message)
     }
 }
 
+void IqWampCallee::processHello(const QJsonArray &jsonMessage)
+{
+    IqWamp::MessageTypes messageType = static_cast<IqWamp::MessageTypes>(jsonMessage.at(0).toInt());
+
+    QJsonValue messageSecondParam = jsonMessage.at(1);
+
+    if (!messageSecondParam.isString()) {
+#ifdef IQWAMP_DEBUG_MODE
+        qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! Second value on message array must be string.";
+#endif
+        return;
+    }
+    emit hello(messageSecondParam.toString());
+}
+
 QString IqWampCallee::messageTypeName(IqWamp::MessageTypes messageType)
 {
-    switch (messageType) {
-        case IqWamp::MessageTypes::Welcome: return QStringLiteral("WELCOME");
-        case IqWamp::MessageTypes::Subscribe: return QStringLiteral("SUBSCRIBE");
-        case IqWamp::MessageTypes::UnSubscribe: return QStringLiteral("UNSUBSCRIBE");
-        case IqWamp::MessageTypes::Publish: return QStringLiteral("PUBLISH");
-        case IqWamp::MessageTypes::Event: return QStringLiteral("EVENT");
-        case IqWamp::MessageTypes::Register: return QStringLiteral("REGISTER");
-        case IqWamp::MessageTypes::Registered: return QStringLiteral("REGISTERED");
-        case IqWamp::MessageTypes::UnRegister: return QStringLiteral("UNREGISTER");
-        case IqWamp::MessageTypes::Invocation: return QStringLiteral("INVOCATION");
-        case IqWamp::MessageTypes::Call: return QStringLiteral("CALL");
-        case IqWamp::MessageTypes::Result: return QStringLiteral("RESULT");
-        default: return QStringLiteral("unknown_message_type");
-    }
-
-    return "unknown_message_type";
+    return IqWampJsonWebSocketHelper::messageTypeName(messageType);
 }
 
 void IqWampCallee::sendEvent(const QSharedPointer<IqWampSubscription> &subscription,
@@ -187,7 +146,14 @@ void IqWampCallee::sendWelcome()
     message.append(QJsonValue(m_sessionId));
 
     QJsonObject details;
+    QString libVersion = LIB_VERSION;
+    details.insert("agent", QString("IqWampServer-%0").arg(libVersion));
+
     QJsonObject roles;
+    roles.insert("publisher", QJsonObject());
+    roles.insert("subscriber", QJsonObject());
+    roles.insert("caller", QJsonObject());
+    roles.insert("callee", QJsonObject());
     details.insert("roles", roles);
     message.append(details);
 
@@ -201,14 +167,7 @@ void IqWampCallee::createSessionId()
 
 void IqWampCallee::send(const QJsonArray &jsonArray)
 {
-    QJsonDocument doc (jsonArray);
-    QString message = doc.toJson();
-
-#ifdef IQWAMP_DEBUG_MODE
-    qDebug() << "Send message" << message;
-#endif
-
-    m_socket->sendTextMessage(message);
+    IqWampJsonWebSocketHelper::send(m_socket, jsonArray);
 }
 
 void IqWampCallee::sendAbort(const QString &reason, const QJsonObject &details)
@@ -393,14 +352,7 @@ void IqWampCallee::sendError(IqWamp::MessageTypes requestType,
                                    const QString &error,
                                    const QJsonObject &details)
 {
-    QJsonArray message;
-    message.append(static_cast<int>(IqWamp::MessageTypes::Error));
-    message.append(static_cast<int>(requestType));
-    message.append(request);
-    message.append(details);
-    message.append(error);
-
-    send(message);
+    IqWampJsonWebSocketHelper::sendError(m_socket, requestType, request, error, details);
 }
 
 void IqWampCallee::processCall(const QJsonArray &jsonMessage)
