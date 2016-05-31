@@ -36,7 +36,7 @@ class IqWampLocalCallee: public IqWampAbstractCallee
 public:
     explicit IqWampLocalCallee(IqWampLocalClient *client, QObject *parent = 0);
 
-    virtual void sendEvent(const QSharedPointer<IqWampSubscription> &subscription,
+    virtual void sendEvent(const QSharedPointer<IqWampCalleeSubscription> &subscription,
                            int publicationId,
                            const QJsonArray &arguments,
                            const QJsonObject &argumentsKw) Q_DECL_OVERRIDE;

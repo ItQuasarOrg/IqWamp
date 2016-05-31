@@ -32,11 +32,11 @@ IqWampLocalClient::IqWampLocalClient(QObject *parent, IqWampRealm *realm) :
 
 bool IqWampLocalClient::publishEvent(const QString &topic, const QJsonArray &arguments, const QJsonObject &argumentsKw)
 {
-    IqWampSubscriptions *subscriptions = m_realm->subscriptions();
+    IqWampCalleeSubscriptions *subscriptions = m_realm->subscriptions();
     if (!subscriptions->hasSubscription(topic))
         return false;
 
-    QSharedPointer<IqWampSubscription> subscription = subscriptions->subscription(topic);
+    QSharedPointer<IqWampCalleeSubscription> subscription = subscriptions->subscription(topic);
 
     IqWampBroker *broker = m_realm->broker();
     broker->publish(subscription, arguments, argumentsKw);

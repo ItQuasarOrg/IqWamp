@@ -28,7 +28,7 @@ IqWampRealmPrivate::IqWampRealmPrivate(IqWampRealm *parent):
     q_ptr(parent),
     m_name(""),
     m_localClient(new IqWampLocalClient(this, parent)),
-    m_subscriptions(new IqWampSubscriptions(this)),
+    m_subscriptions(new IqWampCalleeSubscriptions(this)),
     m_registrations(new IqWampRegistrations(this)),
     m_broker(new IqWampBroker(this)),
     m_dialer(new IqWampDialer(this))
@@ -165,7 +165,7 @@ void IqWampRealmPrivate::addClient(IqWampCallee *client)
 //    sendEvent(subscription, publicationId, QJsonArray(), argumentsKw);
 //}
 
-IqWampSubscriptions *IqWampRealmPrivate::subscriptions() const
+IqWampCalleeSubscriptions *IqWampRealmPrivate::subscriptions() const
 {
     return m_subscriptions;
 }

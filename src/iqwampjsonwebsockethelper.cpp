@@ -110,6 +110,7 @@ QString IqWampJsonWebSocketHelper::messageTypeName(IqWamp::MessageTypes messageT
     switch (messageType) {
         case IqWamp::MessageTypes::Welcome: return QStringLiteral("WELCOME");
         case IqWamp::MessageTypes::Subscribe: return QStringLiteral("SUBSCRIBE");
+        case IqWamp::MessageTypes::Subscribed: return QStringLiteral("SUBSCRIBED");
         case IqWamp::MessageTypes::UnSubscribe: return QStringLiteral("UNSUBSCRIBE");
         case IqWamp::MessageTypes::Publish: return QStringLiteral("PUBLISH");
         case IqWamp::MessageTypes::Event: return QStringLiteral("EVENT");

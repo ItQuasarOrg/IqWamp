@@ -19,23 +19,25 @@
  **
  **********************************************************************************/
 
-#ifndef IQWAMPSUBSCRIPTION_H
-#define IQWAMPSUBSCRIPTION_H
+#include "iqwampcallbacksubscription.h"
 
-#include <QObject>
-
-class IqWampSubscription
+IqWampCallbackSubscription::IqWampCallbackSubscription(int id,
+                                                       const QString &topic,
+                                                       std::function<void(const QJsonArray &,
+                                                                          const QJsonObject &)> callback) :
+    IqWampSubscription(id, topic),
+    m_callback(callback)
 {
-public:
-    explicit IqWampSubscription(int id, const QString &topic);
+}
 
-    QString topic() const;
+void IqWampCallbackSubscription::execute(const QJsonArray &arguments, const QJsonObject &argumentsKw)
+{
+    m_callback(arguments, argumentsKw);
+}
 
-    int id() const;
+std::function<void(const QJsonArray &, const QJsonObject &)> IqWampCallbackSubscription::callback() const
+{
+    return m_callback;
+}
 
-private:
-    QString m_topic;
-    int m_id;
-};
 
-#endif //IQWAMPSUBSCRIPTION_H

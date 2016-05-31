@@ -114,7 +114,7 @@ QString IqWampCallee::messageTypeName(IqWamp::MessageTypes messageType)
     return IqWampJsonWebSocketHelper::messageTypeName(messageType);
 }
 
-void IqWampCallee::sendEvent(const QSharedPointer<IqWampSubscription> &subscription,
+void IqWampCallee::sendEvent(const QSharedPointer<IqWampCalleeSubscription> &subscription,
                              int publicationId,
                              const QJsonArray &arguments,
                              const QJsonObject &argumentsKw)
@@ -188,16 +188,16 @@ void IqWampCallee::closeConnection()
 void IqWampCallee::processRegister(const QJsonArray &jsonMessage)
 {
     IqWamp::MessageTypes messageType = static_cast<IqWamp::MessageTypes>(jsonMessage.at(0).toInt());
-    QJsonValue request = jsonMessage.at(1);
+    QJsonValue request = jsonMessage.at(static_cast<int>(IqWamp::RegisterMessage::Request));
 
-    if (!jsonMessage.at(3).isString()) {
+    if (!jsonMessage.at(static_cast<int>(IqWamp::RegisterMessage::Procedure)).isString()) {
 #ifdef IQWAMP_DEBUG_MODE
         qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! Procedure must be url.";
 #endif
         return;
     }
 
-    QString procedure = jsonMessage.at(3).toString();
+    QString procedure = jsonMessage.at(static_cast<int>(IqWamp::RegisterMessage::Procedure)).toString();
 
     IqWampRegistrations *registrations = m_realm->registrations();
 
@@ -220,19 +220,19 @@ void IqWampCallee::processRegister(const QJsonArray &jsonMessage)
 void IqWampCallee::processSubscribe(const QJsonArray &jsonMessage)
 {
     IqWamp::MessageTypes messageType = static_cast<IqWamp::MessageTypes>(jsonMessage.at(0).toInt());
-    QJsonValue request = jsonMessage.at(1);
+    QJsonValue request = jsonMessage.at(static_cast<int>(IqWamp::SubscribeMessage::Request));
 
-    if (!jsonMessage.at(3).isString()) {
+    if (!jsonMessage.at(static_cast<int>(IqWamp::SubscribeMessage::Topic)).isString()) {
 #ifdef IQWAMP_DEBUG_MODE
         qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! Topic must be uri.";
 #endif
         return;
     }
 
-    QString topic = jsonMessage.at(3).toString();
+    QString topic = jsonMessage.at(static_cast<int>(IqWamp::SubscribeMessage::Topic)).toString();
 
-    IqWampSubscriptions *subscriptions = m_realm->subscriptions();
-    QSharedPointer<IqWampSubscription> subscription;
+    IqWampCalleeSubscriptions *subscriptions = m_realm->subscriptions();
+    QSharedPointer<IqWampCalleeSubscription> subscription;
 
     if (subscriptions->hasSubscription(topic)) {
          subscription = subscriptions->subscription(topic);
@@ -269,16 +269,16 @@ void IqWampCallee::sendRegistered(const QJsonValue &request, int registrationId)
 void IqWampCallee::processUnRegister(const QJsonArray &jsonMessage)
 {
     IqWamp::MessageTypes messageType = static_cast<IqWamp::MessageTypes>(jsonMessage.at(0).toInt());
-    QJsonValue request = jsonMessage.at(1);
+    QJsonValue request = jsonMessage.at(static_cast<int>(IqWamp::UnRegisterMessage::Request));
 
-    if (!jsonMessage.at(2).isDouble()) {
+    if (!jsonMessage.at(static_cast<int>(IqWamp::UnRegisterMessage::Registration)).isDouble()) {
 #ifdef IQWAMP_DEBUG_MODE
         qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! REGISTRATION.Registration must be id.";
 #endif
         return;
     }
 
-    int registrationId = jsonMessage.at(2).toInt();
+    int registrationId = jsonMessage.at(static_cast<int>(IqWamp::UnRegisterMessage::Registration)).toInt();
 
     IqWampRegistrations *registrations = m_realm->registrations();
 
@@ -301,24 +301,24 @@ void IqWampCallee::processUnRegister(const QJsonArray &jsonMessage)
 void IqWampCallee::processUnSubscribe(const QJsonArray &jsonMessage)
 {
     IqWamp::MessageTypes messageType = static_cast<IqWamp::MessageTypes>(jsonMessage.at(0).toInt());
-    QJsonValue request = jsonMessage.at(1);
+    QJsonValue request = jsonMessage.at(static_cast<int>(IqWamp::UnSubscribeMessage::Request));
 
-    if (!jsonMessage.at(2).isDouble()) {
+    if (!jsonMessage.at(static_cast<int>(IqWamp::UnSubscribeMessage::Subscription)).isDouble()) {
 #ifdef IQWAMP_DEBUG_MODE
         qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! SUBSCRIBED.Subscription must be id.";
 #endif
         return;
     }
 
-    int subscriptionId = jsonMessage.at(2).toInt();
+    int subscriptionId = jsonMessage.at(static_cast<int>(IqWamp::UnSubscribeMessage::Subscription)).toInt();
 
-    IqWampSubscriptions *subscriptions = m_realm->subscriptions();
+    IqWampCalleeSubscriptions *subscriptions = m_realm->subscriptions();
 
     if (!subscriptions->hasSubscription(subscriptionId)) {
         sendError(messageType, request, IqWamp::Errors::NoSuchSubscription);
         return;
     } else {
-        QSharedPointer<IqWampSubscription> subscription = subscriptions->subscription(subscriptionId);
+        QSharedPointer<IqWampCalleeSubscription> subscription = subscriptions->subscription(subscriptionId);
         if (!subscription->hasCallee(this)) {
             sendError(messageType, request, IqWamp::Errors::NotSubscribed);
             return;
@@ -358,38 +358,38 @@ void IqWampCallee::sendError(IqWamp::MessageTypes requestType,
 void IqWampCallee::processCall(const QJsonArray &jsonMessage)
 {
     IqWamp::MessageTypes messageType = static_cast<IqWamp::MessageTypes>(jsonMessage.at(0).toInt());
-    QJsonValue request = jsonMessage.at(1);
+    QJsonValue request = jsonMessage.at(static_cast<int>(IqWamp::CallMessage::Request));
 
-    if (!jsonMessage.at(3).isString()) {
+    if (!jsonMessage.at(static_cast<int>(IqWamp::CallMessage::Procedure)).isString()) {
 #ifdef IQWAMP_DEBUG_MODE
         qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! Procedure must be uri.";
 #endif
         return;
     }
+    QString procedure = jsonMessage.at(static_cast<int>(IqWamp::CallMessage::Procedure)).toString();
 
     QJsonArray  arguments;
-    QJsonObject  argumentsKw;
-    if (jsonMessage.size() > 4) {
-        if (!jsonMessage.at(4).isArray()) {
+    if (jsonMessage.size() > static_cast<int>(IqWamp::CallMessage::Arguments)) {
+        if (!jsonMessage.at(static_cast<int>(IqWamp::CallMessage::Arguments)).isArray()) {
 #ifdef IQWAMP_DEBUG_MODE
             qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! Arguments must be list.";
 #endif
             return;
         }
-        arguments = jsonMessage.at(4).toArray();
-
-        if (jsonMessage.size() > 5) {
-            if (!jsonMessage.at(5).isObject()) {
-#ifdef IQWAMP_DEBUG_MODE
-                qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! ArgumentsKw must be dict.";
-#endif
-                return;
-            }
-            argumentsKw = jsonMessage.at(5).toObject();
-        }
+        arguments = jsonMessage.at(static_cast<int>(IqWamp::CallMessage::Arguments)).toArray();
     }
 
-    QString procedure = jsonMessage.at(3).toString();
+    QJsonObject  argumentsKw;
+    if (jsonMessage.size() > static_cast<int>(IqWamp::CallMessage::ArgumentsKw)) {
+        if (!jsonMessage.at(static_cast<int>(IqWamp::CallMessage::ArgumentsKw)).isObject()) {
+#ifdef IQWAMP_DEBUG_MODE
+            qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! ArgumentsKw must be dict.";
+#endif
+            return;
+        }
+        argumentsKw = jsonMessage.at(static_cast<int>(IqWamp::CallMessage::ArgumentsKw)).toObject();
+    }
+
 
     IqWampRegistrations *registrations = m_realm->registrations();
     if (!registrations->hasRegistration(procedure)) {
@@ -408,45 +408,45 @@ void IqWampCallee::processCall(const QJsonArray &jsonMessage)
 void IqWampCallee::processPublish(const QJsonArray &jsonMessage)
 {
     IqWamp::MessageTypes messageType = static_cast<IqWamp::MessageTypes>(jsonMessage.at(0).toInt());
-    QJsonValue request = jsonMessage.at(1);
+    QJsonValue request = jsonMessage.at(static_cast<int>(IqWamp::PublishMessage::Request));
 
-    if (!jsonMessage.at(3).isString()) {
+    if (!jsonMessage.at(static_cast<int>(IqWamp::PublishMessage::Topic)).isString()) {
 #ifdef IQWAMP_DEBUG_MODE
         qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! Topic must be uri.";
 #endif
         return;
     }
+    QString topic = jsonMessage.at(static_cast<int>(IqWamp::PublishMessage::Topic)).toString();
 
     QJsonArray  arguments;
-    QJsonObject  argumentsKw;
-    if (jsonMessage.size() > 4) {
-        if (!jsonMessage.at(4).isArray()) {
+    if (jsonMessage.size() > static_cast<int>(IqWamp::PublishMessage::Arguments)) {
+        if (!jsonMessage.at(static_cast<int>(IqWamp::PublishMessage::Arguments)).isArray()) {
 #ifdef IQWAMP_DEBUG_MODE
             qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! Arguments must be list.";
 #endif
             return;
         }
-        arguments = jsonMessage.at(4).toArray();
-
-        if (jsonMessage.size() > 5) {
-            if (!jsonMessage.at(5).isObject()) {
-#ifdef IQWAMP_DEBUG_MODE
-                qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! ArgumentsKw must be dict.";
-#endif
-                return;
-            }
-            argumentsKw = jsonMessage.at(4).toObject();
-        }
+        arguments = jsonMessage.at(static_cast<int>(IqWamp::PublishMessage::Arguments)).toArray();
     }
 
-    QString topic = jsonMessage.at(3).toString();
-    IqWampSubscriptions *subscriptions = m_realm->subscriptions();
+    QJsonObject  argumentsKw;
+    if (jsonMessage.size() > static_cast<int>(IqWamp::PublishMessage::ArgumentsKw)) {
+        if (!jsonMessage.at(static_cast<int>(IqWamp::PublishMessage::ArgumentsKw)).isObject()) {
+#ifdef IQWAMP_DEBUG_MODE
+            qWarning() << IqWampCallee::messageTypeName(messageType) << "message is not formatted correctly! ArgumentsKw must be dict.";
+#endif
+            return;
+        }
+        argumentsKw = jsonMessage.at(static_cast<int>(IqWamp::PublishMessage::ArgumentsKw)).toObject();
+    }
+
+    IqWampCalleeSubscriptions *subscriptions = m_realm->subscriptions();
     if (!subscriptions->hasSubscription(topic)) {
         sendError(IqWamp::MessageTypes::Publish, request, IqWamp::Errors::NotFoundTopic);
         return;
     }
 
-    QSharedPointer<IqWampSubscription> subscription = subscriptions->subscription(topic);
+    QSharedPointer<IqWampCalleeSubscription> subscription = subscriptions->subscription(topic);
 
     int publicationId = m_realm->broker()->publish(subscription, arguments, argumentsKw);
 

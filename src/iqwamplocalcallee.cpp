@@ -58,7 +58,7 @@ void IqWampLocalCallee::sendInvocation(const QSharedPointer<IqWampRegistration> 
     dialer->processYield(registration, callbackResult);
 }
 
-void IqWampLocalCallee::sendEvent(const QSharedPointer<IqWampSubscription> &subscription,
+void IqWampLocalCallee::sendEvent(const QSharedPointer<IqWampCalleeSubscription> &subscription,
                                   int publicationId,
                                   const QJsonArray &arguments,
                                   const QJsonObject &argumentsKw)
@@ -68,8 +68,8 @@ void IqWampLocalCallee::sendEvent(const QSharedPointer<IqWampSubscription> &subs
 
 bool IqWampLocalCallee::subscribe(const QString &topic)
 {
-    IqWampSubscriptions *subscriptions = m_localClient->realm()->subscriptions();
-    QSharedPointer<IqWampSubscription> subscription;
+    IqWampCalleeSubscriptions *subscriptions = m_localClient->realm()->subscriptions();
+    QSharedPointer<IqWampCalleeSubscription> subscription;
 
     if (subscriptions->hasSubscription(topic)) {
         subscription = subscriptions->subscription(topic);

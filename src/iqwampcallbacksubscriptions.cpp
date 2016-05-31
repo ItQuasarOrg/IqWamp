@@ -19,23 +19,20 @@
  **
  **********************************************************************************/
 
-#ifndef IQWAMPSUBSCRIPTION_H
-#define IQWAMPSUBSCRIPTION_H
+#include "iqwampcallbacksubscriptions.h"
 
-#include <QObject>
-
-class IqWampSubscription
+IqWampCallbackSubscriptions::IqWampCallbackSubscriptions(QObject *parent) :
+    IqWampSubscriptions<IqWampCallbackSubscription>(parent)
 {
-public:
-    explicit IqWampSubscription(int id, const QString &topic);
+}
 
-    QString topic() const;
+QSharedPointer<IqWampCallbackSubscription> IqWampCallbackSubscriptions::create(int id,
+                                                                               const QString &topic,
+                                                                               std::function<void(const QJsonArray &, const QJsonObject &)> callback)
+{
+    QSharedPointer<IqWampCallbackSubscription> subscription (new IqWampCallbackSubscription(id, topic, callback));
+    addSubscription(qSharedPointerCast<IqWampSubscription>(subscription));
+    return subscription;
+}
 
-    int id() const;
 
-private:
-    QString m_topic;
-    int m_id;
-};
-
-#endif //IQWAMPSUBSCRIPTION_H

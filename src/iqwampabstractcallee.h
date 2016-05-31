@@ -25,7 +25,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QSharedPointer>
-#include "iqwampsubscription.h"
+#include "iqwampcalleesubscription.h"
 #include "iqwampregistration.h"
 #include "iqwamp.h"
 
@@ -37,7 +37,7 @@ public:
 
     virtual ~IqWampAbstractCallee();
 
-    virtual void sendEvent(const QSharedPointer<IqWampSubscription> &subscription,
+    virtual void sendEvent(const QSharedPointer<IqWampCalleeSubscription> &subscription,
                            int publicationId,
                            const QJsonArray &arguments,
                            const QJsonObject &argumentsKw) = 0;

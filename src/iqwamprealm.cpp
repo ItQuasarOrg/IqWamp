@@ -52,7 +52,7 @@ IqWampRegistrations *IqWampRealm::registrations() const
     return d->registrations();
 }
 
-IqWampSubscriptions *IqWampRealm::subscriptions() const
+IqWampCalleeSubscriptions *IqWampRealm::subscriptions() const
 {
     Q_D(const IqWampRealm);
     return d->subscriptions();

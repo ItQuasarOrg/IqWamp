@@ -19,25 +19,33 @@
  **
  **********************************************************************************/
 
-#include "iqwampbroker.h"
+#include "iqwampcalleesubscription.h"
 #include "iqwampabstractcallee.h"
 
-IqWampBroker::IqWampBroker(QObject *parent):
-    QObject(parent),
-    m_lastPublicationId(0)
+IqWampCalleeSubscription::IqWampCalleeSubscription(int id, const QString &topic, IqWampAbstractCallee *callee):
+    IqWampSubscription(id, topic)
 {
+    addCallee(callee);
 }
 
-int IqWampBroker::publish(const QSharedPointer<IqWampCalleeSubscription> &subscription,
-                          const QJsonArray &arguments,
-                          const QJsonObject &argumentsKw)
+bool IqWampCalleeSubscription::hasCallee(const IqWampAbstractCallee *callee) const
 {
-    int publicationId = m_lastPublicationId++;
-    for(IqWampAbstractCallee *client: subscription->callees()) {
-        client->sendEvent(subscription, publicationId, arguments, argumentsKw);
-    }
+    return m_callees.contains(const_cast<IqWampAbstractCallee *>(callee));
+}
 
-    return publicationId;
+void IqWampCalleeSubscription::addCallee(IqWampAbstractCallee *callee)
+{
+    m_callees.insert(callee);
+}
+
+void IqWampCalleeSubscription::removeCallee(const IqWampAbstractCallee *callee)
+{
+    m_callees.remove(const_cast<IqWampAbstractCallee *>(callee));
+}
+
+QSet<IqWampAbstractCallee *> IqWampCalleeSubscription::callees() const
+{
+    return m_callees;
 }
 
 

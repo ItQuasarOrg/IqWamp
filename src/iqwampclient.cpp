@@ -23,6 +23,7 @@
 #include <QWebSocket>
 #include "iqwamp.h"
 #include "iqwampjsonwebsockethelper.h"
+#include "iqwampcallbacksubscriptions.h"
 
 class IqWampClientPrivate : public QObject
 {
@@ -32,13 +33,19 @@ public:
 
     bool open(const QString &url, const QString &realm);
 
+    bool subscribeToTopic(const QString &topic,
+                          const QJsonObject &options,
+                          std::function<void(const QJsonArray &, const QJsonObject &)> callback);
+
 private:
-    QJsonValue newMessageRequest();
+    int newMessageRequest();
 
     void processTextMessage(const QString &message);
     void sendHello();
 
     void processWelcome(const QJsonArray &jsonMessage);
+
+    void processSubscribed(const QJsonArray &jsonMessage);
 private:
     QScopedPointer<QWebSocket> m_socket;
     IqWampClient *q_ptr;
@@ -46,16 +53,19 @@ private:
     int m_currentMessageId;
     bool m_opened;
     QString m_sessionId;
+    IqWampCallbackSubscriptions *m_subscriptions;
+
+    QHash<int, QSharedPointer<IqWampCallbackSubscription> > m_subscribedQuery;
+    void processEvent(const QJsonArray &jsonMessage);
 };
 
 IqWampClientPrivate::IqWampClientPrivate(IqWampClient *client) :
     QObject(client),
     m_socket(new QWebSocket()),
     q_ptr(client),
-    m_realm(""),
     m_currentMessageId(0),
     m_opened(false),
-    m_sessionId("")
+    m_subscriptions(new IqWampCallbackSubscriptions(this))
 {
     connect(m_socket.data(), &QWebSocket::connected, this, &IqWampClientPrivate::sendHello);
     connect(m_socket.data(), &QWebSocket::textMessageReceived, this, &IqWampClientPrivate::processTextMessage);
@@ -71,9 +81,9 @@ bool IqWampClientPrivate::open(const QString &url, const QString &realm)
     return true;
 }
 
-QJsonValue IqWampClientPrivate::newMessageRequest()
+int IqWampClientPrivate::newMessageRequest()
 {
-    return QJsonValue(m_currentMessageId++);
+    return m_currentMessageId++;
 }
 
 void IqWampClientPrivate::sendHello()
@@ -116,28 +126,28 @@ void IqWampClientPrivate::processTextMessage(const QString &message)
             processWelcome(messageArray);
         } break;
         case IqWamp::MessageTypes::Event: {
-        }
-            break;
+            processEvent(messageArray);
+        } break;
 
-        case IqWamp::MessageTypes::Subscribe: {
-        }
-            break;
-        case IqWamp::MessageTypes::UnSubscribe: {
-        }
-            break;
-        case IqWamp::MessageTypes::Publish: {
-            break;
-        }
-
-        case IqWamp::MessageTypes::Register: {
-            break;
-        }
-        case IqWamp::MessageTypes::UnRegister: {
-            break;
-        }
-        case IqWamp::MessageTypes::Call: {
-            break;
-        }
+        case IqWamp::MessageTypes::Subscribed: {
+            processSubscribed(messageArray);
+        } break;
+//        case IqWamp::MessageTypes::UnSubscribe: {
+//        }
+//            break;
+//        case IqWamp::MessageTypes::Publish: {
+//            break;
+//        }
+//
+//        case IqWamp::MessageTypes::Register: {
+//            break;
+//        }
+//        case IqWamp::MessageTypes::UnRegister: {
+//            break;
+//        }
+//        case IqWamp::MessageTypes::Call: {
+//            break;
+//        }
 
         default: {
 #ifdef IQWAMP_DEBUG_MODE
@@ -175,6 +185,128 @@ void IqWampClientPrivate::processWelcome(const QJsonArray &jsonMessage)
     emit q->opened();
 }
 
+bool IqWampClientPrivate::subscribeToTopic(const QString &topic,
+                                           const QJsonObject &options,
+                                           std::function<void(const QJsonArray &, const QJsonObject &)> callback)
+{
+    QSharedPointer<IqWampCallbackSubscription> subscription = QSharedPointer<IqWampCallbackSubscription>::create(-1, topic, callback);
+    int requestId = newMessageRequest();
+    m_subscribedQuery[requestId] = subscription;
+
+    QJsonArray message;
+    message.append(static_cast<int>(IqWamp::MessageTypes::Subscribe));
+    message.append(requestId);
+    message.append(options);
+    message.append(topic);
+
+    IqWampJsonWebSocketHelper::send(m_socket.data(), message);
+
+    return true;
+}
+
+void IqWampClientPrivate::processSubscribed(const QJsonArray &jsonMessage)
+{
+    IqWamp::MessageTypes messageType = static_cast<IqWamp::MessageTypes>(jsonMessage.at(0).toInt());
+
+    if (!jsonMessage.at(static_cast<int>(IqWamp::SubscribedMessage::Request)).isDouble()) {
+#ifdef IQWAMP_DEBUG_MODE
+        qWarning() << IqWampJsonWebSocketHelper::messageTypeName(messageType) << "message is not formatted correctly! Request must be id.";
+#endif
+        return;
+    }
+
+    int requestId = jsonMessage.at(static_cast<int>(IqWamp::SubscribedMessage::Request)).toInt();
+
+    if (!jsonMessage.at(static_cast<int>(IqWamp::SubscribedMessage::Subscription)).isDouble()) {
+#ifdef IQWAMP_DEBUG_MODE
+        qWarning() << IqWampJsonWebSocketHelper::messageTypeName(messageType) << "message is not formatted correctly! Subscription must be id.";
+#endif
+        return;
+    }
+
+    int subscriptionId = jsonMessage.at(static_cast<int>(IqWamp::SubscribedMessage::Subscription)).toInt();
+
+    if (!m_subscribedQuery.contains(requestId)) {
+#ifdef IQWAMP_DEBUG_MODE
+        qWarning() << IqWampJsonWebSocketHelper::messageTypeName(messageType) << "message with id =" << requestId << "is not expected!";
+#endif
+        return;
+    }
+
+    QSharedPointer<IqWampCallbackSubscription> subscription = m_subscribedQuery.take(requestId);
+    m_subscriptions->create(subscriptionId, subscription->topic(), subscription->callback());
+}
+
+void IqWampClientPrivate::processEvent(const QJsonArray &jsonMessage)
+{
+
+    IqWamp::MessageTypes messageType = static_cast<IqWamp::MessageTypes>(jsonMessage.at(0).toInt());
+
+    if (!jsonMessage.at(static_cast<int>(IqWamp::EventMessage::Subscription)).isDouble()) {
+#ifdef IQWAMP_DEBUG_MODE
+        qWarning() << IqWampJsonWebSocketHelper::messageTypeName(messageType) << "message is not formatted correctly! Subscription must be id.";
+#endif
+        return;
+    }
+
+    int subscriptionId = jsonMessage.at(static_cast<int>(IqWamp::EventMessage::Subscription)).toInt();
+
+    if (!jsonMessage.at(static_cast<int>(IqWamp::EventMessage::Publication)).isDouble()) {
+#ifdef IQWAMP_DEBUG_MODE
+        qWarning() << IqWampJsonWebSocketHelper::messageTypeName(messageType) << "message is not formatted correctly! Publication must be id.";
+#endif
+        return;
+    }
+
+//    int publicationId = jsonMessage.at(static_cast<int>(IqWamp::EventMessage::Publication)).toInt();
+
+    if (!jsonMessage.at(static_cast<int>(IqWamp::EventMessage::Details)).isObject()) {
+#ifdef IQWAMP_DEBUG_MODE
+        qWarning() << IqWampJsonWebSocketHelper::messageTypeName(messageType) << "message is not formatted correctly! Details must be dict.";
+#endif
+        return;
+    }
+
+    QJsonArray arguments = QJsonArray();
+    if (jsonMessage.size() > static_cast<int>(IqWamp::EventMessage::Arguments) ) {
+        if (!jsonMessage.at(static_cast<int>(IqWamp::EventMessage::Arguments)).isArray()) {
+#ifdef IQWAMP_DEBUG_MODE
+            qWarning() << IqWampJsonWebSocketHelper::messageTypeName(messageType) << "message is not formatted correctly! Arguments must be list.";
+#endif
+            return;
+        }
+
+        arguments = jsonMessage.at(static_cast<int>(IqWamp::EventMessage::Arguments)).toArray();
+    }
+
+    QJsonObject argumentsKw = QJsonObject();
+    if (jsonMessage.size() > static_cast<int>(IqWamp::EventMessage::ArgumentsKw) ) {
+        if (!jsonMessage.at(static_cast<int>(IqWamp::EventMessage::ArgumentsKw)).isObject()) {
+#ifdef IQWAMP_DEBUG_MODE
+            qWarning() << IqWampJsonWebSocketHelper::messageTypeName(messageType) << "message is not formatted correctly! ArgumentsKw must be dict.";
+#endif
+            return;
+        }
+
+        argumentsKw = jsonMessage.at(static_cast<int>(IqWamp::EventMessage::ArgumentsKw)).toObject();
+    }
+
+    if (!m_subscriptions->hasSubscription(subscriptionId)) {
+#ifdef IQWAMP_DEBUG_MODE
+        qWarning() << IqWampJsonWebSocketHelper::messageTypeName(messageType) << "message is not expected! Not subscribed to id =" << subscriptionId << ".";
+#endif
+        return;
+    }
+
+    QSharedPointer<IqWampCallbackSubscription> subscription = m_subscriptions->subscription(subscriptionId);
+    subscription->execute(arguments, argumentsKw);
+}
+
+
+
+
+
+
 
 
 
@@ -191,7 +323,8 @@ bool IqWampClient::subscribeToTopic(const QString &topic,
                                     const QJsonObject &options,
                                     std::function<void(const QJsonArray &, const QJsonObject &)> callback)
 {
-    return true;
+    Q_D(IqWampClient);
+    return d->subscribeToTopic(topic, options, callback);
 }
 
 bool IqWampClient::publishEvent(const QString &topic, const QJsonArray &arguments, const QJsonObject &argumentsKw)

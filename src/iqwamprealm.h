@@ -22,7 +22,7 @@
 
 #include <QObject>
 #include "iqwamp_global.h"
-#include "iqwampsubscriptions.h"
+#include "iqwampcalleesubscriptions.h"
 #include "iqwampregistrations.h"
 #include "iqwampbroker.h"
 #include "iqwampdialer.h"
@@ -46,7 +46,7 @@ public:
     IqWampLocalClient * localClient() const;
 
     IqWampRegistrations *registrations() const;
-    IqWampSubscriptions *subscriptions() const;
+    IqWampCalleeSubscriptions *subscriptions() const;
     IqWampBroker *broker() const;
     IqWampDialer *dialer() const;
 

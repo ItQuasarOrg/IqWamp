@@ -19,23 +19,18 @@
  **
  **********************************************************************************/
 
-#ifndef IQWAMPSUBSCRIPTION_H
-#define IQWAMPSUBSCRIPTION_H
+#ifndef IQWAMPCALLBACKSUBSCRIPTIONS_H
+#define IQWAMPCALLBACKSUBSCRIPTIONS_H
 
-#include <QObject>
+#include "iqwampsubscriptions.h"
+#include "iqwampcallbacksubscription.h"
 
-class IqWampSubscription
+class IqWampCallbackSubscriptions: public IqWampSubscriptions<IqWampCallbackSubscription>
 {
 public:
-    explicit IqWampSubscription(int id, const QString &topic);
-
-    QString topic() const;
-
-    int id() const;
-
-private:
-    QString m_topic;
-    int m_id;
+    explicit IqWampCallbackSubscriptions(QObject *parent = 0);
+    QSharedPointer<IqWampCallbackSubscription> create(int id, const QString &topic, std::function<void(const QJsonArray &, const QJsonObject &)> callback);
 };
 
-#endif //IQWAMPSUBSCRIPTION_H
+
+#endif //IQMETEOGUI_IQWAMPCALLBACKSUBSCRIPTIONS_H

@@ -20,47 +20,4 @@
  **********************************************************************************/
 
 #include "iqwampsubscriptions.h"
-#include <QSharedPointer>
-
-IqWampSubscriptions::IqWampSubscriptions(QObject *parent):
-    QObject(parent),
-    m_lastSubscriptionId(0)
-{
-}
-
-bool IqWampSubscriptions::hasSubscription(const QString &topic) const
-{
-    return m_subscriptionOnTopic.contains(topic);
-}
-
-bool IqWampSubscriptions::hasSubscription(int id) const
-{
-    return m_subscriptionOnId.contains(id);
-}
-
-QSharedPointer<IqWampSubscription> IqWampSubscriptions::subscription(const QString &topic) const
-{
-    return m_subscriptionOnTopic[topic];
-}
-
-QSharedPointer<IqWampSubscription> IqWampSubscriptions::subscription(int id) const
-{
-    return m_subscriptionOnId[id];
-}
-
-QSharedPointer<IqWampSubscription> IqWampSubscriptions::create(const QString &topic, IqWampAbstractCallee *callee)
-{
-    int id = m_lastSubscriptionId++;
-    QSharedPointer<IqWampSubscription> subscription (new IqWampSubscription(id, topic, callee));
-    m_subscriptionOnTopic[topic] = subscription;
-    m_subscriptionOnId[id] = subscription;
-    return subscription;
-}
-
-void IqWampSubscriptions::remove(const IqWampAbstractCallee *callee)
-{
-    for(QSharedPointer<IqWampSubscription> &subscription: m_subscriptionOnId.values()) {
-       subscription->removeCallee(callee);
-    }
-}
 
