@@ -37,6 +37,11 @@ public:
                           const QJsonObject &options,
                           std::function<void(const QJsonArray &, const QJsonObject &)> callback);
 
+    bool callProcedure(const QString &procedure,
+                       const QJsonArray &arguments,
+                       const QJsonObject &argumentsKw,
+                       std::function<void(const QJsonArray &, const QJsonObject &)> callback,
+                       std::function<void(const IqWampCallError &error)> errorCallback);
 private:
     int newMessageRequest();
 
@@ -46,6 +51,7 @@ private:
     void processWelcome(const QJsonArray &jsonMessage);
 
     void processSubscribed(const QJsonArray &jsonMessage);
+
 private:
     QScopedPointer<QWebSocket> m_socket;
     IqWampClient *q_ptr;
@@ -302,16 +308,26 @@ void IqWampClientPrivate::processEvent(const QJsonArray &jsonMessage)
     subscription->execute(arguments, argumentsKw);
 }
 
+bool IqWampClientPrivate::callProcedure(const QString &procedure,
+                                        const QJsonArray &arguments,
+                                        const QJsonObject &argumentsKw,
+                                        std::function<void(const QJsonArray &, const QJsonObject &)> callback,
+                                        std::function<void(const IqWampCallError &error)> errorCallback)
+{
+    int requestId = newMessageRequest();
 
+    QJsonArray message;
+    message.append(static_cast<int>(IqWamp::MessageTypes::Call));
+    message.append(requestId);
+    message.append(QJsonObject());
+    message.append(procedure);
+    message.append(arguments);
+    message.append(argumentsKw);
 
+    IqWampJsonWebSocketHelper::send(m_socket.data(), message);
 
-
-
-
-
-
-
-
+    return true;
+}
 
 IqWampClient::IqWampClient(QObject *parent) :
     IqWampAbstractClient(parent),
@@ -345,3 +361,12 @@ bool IqWampClient::open(const QString &url, const QString &realm)
     return d->open(url, realm);
 }
 
+bool IqWampClient::callProcedure(const QString &procedure,
+                                 const QJsonArray &arguments,
+                                 const QJsonObject &argumentsKw,
+                                 std::function<void(const QJsonArray &, const QJsonObject &)> callback,
+                                 std::function<void(const IqWampCallError &error)> errorCallback)
+{
+    Q_D(IqWampClient);
+    return d->callProcedure(procedure, arguments, argumentsKw, callback, errorCallback);
+}

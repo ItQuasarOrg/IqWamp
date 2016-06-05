@@ -73,3 +73,14 @@ bool IqWampLocalClient::subscribeToTopic(const QString &topic,
     return false;
 }
 
+bool IqWampLocalClient::callProcedure(const QString &procedure,
+                                      const QJsonArray &arguments,
+                                      const QJsonObject &argumentsKw,
+                                      std::function<void(const QJsonArray &, const QJsonObject &)> callback,
+                                      std::function<void(const IqWampCallError &error)> errorCallback)
+{
+    return false;
+}
+
+
+

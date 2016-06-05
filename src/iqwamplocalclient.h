@@ -39,9 +39,18 @@ protected:
                                   const QJsonObject &options,
                                   std::function<void(const QJsonArray &, const QJsonObject &)> callback) Q_DECL_OVERRIDE;
 
-    virtual bool publishEvent(const QString &topic, const QJsonArray &arguments, const QJsonObject &argumentsKw) Q_DECL_OVERRIDE;
+    virtual bool publishEvent(const QString &topic,
+                              const QJsonArray &arguments,
+                              const QJsonObject &argumentsKw) Q_DECL_OVERRIDE;
 
-    virtual bool registerProcedureCallback(const QString &procedure, std::function<IqWampYieldResult (const QJsonArray &, const QJsonObject &)> callback) Q_DECL_OVERRIDE;
+    virtual bool registerProcedureCallback(const QString &procedure,
+                                           std::function<IqWampYieldResult (const QJsonArray &, const QJsonObject &)> callback) Q_DECL_OVERRIDE;
+
+    virtual bool callProcedure(const QString &procedure,
+                               const QJsonArray &arguments,
+                               const QJsonObject &argumentsKw,
+                               std::function<void(const QJsonArray &, const QJsonObject &)> callback,
+                               std::function<void(const IqWampCallError &error)> errorCallback) Q_DECL_OVERRIDE;
 
 public:
     IqWampRealm *realm() const;
