@@ -40,7 +40,7 @@ public:
     LibraryInitializationObject()
     {
         qRegisterMetaType<QPointer<IqWampAbstractCallee> >();
-        qRegisterMetaType<QSharedPointer<IqWampRegistration> >();
+        qRegisterMetaType<QSharedPointer<IqWampCalleeRegistration> >();
     }
 };
 

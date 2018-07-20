@@ -19,34 +19,28 @@
  **
  **********************************************************************************/
 
-#ifndef IQWAMPREGISTRATIONS_H
-#define IQWAMPREGISTRATIONS_H
+#ifndef IQWAMPCALLEESUBSCRIPTION_H
+#define IQWAMPCALLEESUBSCRIPTION_H
 
-#include "iqwampregistrationsbase.h"
+#include <QString>
+#include <QSet>
+#include "iqwampsubscription.h"
 
-template <typename T>
-class IqWampRegistrations : public IqWampRegistrationsBase
+class IqWampAbstractCallee;
+
+class IqWampCalleeSubscription : public IqWampSubscription
 {
 public:
-    explicit IqWampRegistrations(QObject *parent = 0) :
-        IqWampRegistrationsBase(parent)
-    {
-    }
+    IqWampCalleeSubscription(int id, const QString &topic, IqWampAbstractCallee *callee);
 
-    QSharedPointer<T> registration(const QString &procedure) const
-    {
-        return qSharedPointerCast<T>(IqWampRegistrationsBase::registration(procedure));
-    }
+    bool hasCallee(const IqWampAbstractCallee *callee) const;
+    void addCallee(IqWampAbstractCallee *callee);
+    void removeCallee(const IqWampAbstractCallee *callee);
+    QSet<IqWampAbstractCallee *> callees() const;
 
-    QSharedPointer<T> registration(int id) const
-    {
-        return qSharedPointerCast<T>(IqWampRegistrationsBase::registration(id));
-    }
-
-    QSharedPointer<T> take(int id)
-    {
-        return qSharedPointerCast<T>(IqWampRegistrationsBase::take(id));
-    }
+private:
+    QSet<IqWampAbstractCallee *> m_callees;
 };
 
-#endif //IQMETEOSERVER_IQWAMPREGISTRATIONS_H
+
+#endif //IQWAMPCALLEESUBSCRIPTION_H

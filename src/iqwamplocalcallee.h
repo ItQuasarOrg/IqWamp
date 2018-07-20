@@ -27,6 +27,7 @@
 #include <QObject>
 #include <QHash>
 #include "iqwampyieldresult.h"
+#include "iqwampcalleeregistration.h"
 
 class IqWampLocalClient;
 
@@ -36,12 +37,12 @@ class IqWampLocalCallee: public IqWampAbstractCallee
 public:
     explicit IqWampLocalCallee(IqWampLocalClient *client, QObject *parent = 0);
 
-    virtual void sendEvent(const QSharedPointer<IqWampSubscription> &subscription,
+    virtual void sendEvent(const QSharedPointer<IqWampCalleeSubscription> &subscription,
                            int publicationId,
                            const QJsonArray &arguments,
                            const QJsonObject &argumentsKw) Q_DECL_OVERRIDE;
 
-    virtual void sendInvocation(const QSharedPointer<IqWampRegistration> &registration,
+    virtual void sendInvocation(const QSharedPointer<IqWampCalleeRegistration> &registration,
                                 int invocationId,
                                 const QJsonArray &arguments,
                                 const QJsonObject &argumentsKw) Q_DECL_OVERRIDE;

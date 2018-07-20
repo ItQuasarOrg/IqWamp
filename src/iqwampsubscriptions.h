@@ -22,31 +22,31 @@
 #ifndef IQWAMPSUBSCRIPTIONS_H
 #define IQWAMPSUBSCRIPTIONS_H
 
-#include <QObject>
-#include <QHash>
-#include "iqwampabstractcallee.h"
-#include "iqwampsubscription.h"
+#include "iqwampsubscriptionsbase.h"
 
-class IqWampSubscriptions : public QObject
+template <typename T>
+class IqWampSubscriptions : public IqWampSubscriptionsBase
 {
-    Q_OBJECT
 public:
-    explicit IqWampSubscriptions(QObject *parent = 0);
+    explicit IqWampSubscriptions(QObject *parent = 0) :
+        IqWampSubscriptionsBase(parent)
+    {
+    }
 
-    bool hasSubscription(const QString &topic) const;
-    bool hasSubscription(int id) const;
+    QSharedPointer<T> subscription(const QString &topic) const
+    {
+        return qSharedPointerCast<T>(IqWampSubscriptionsBase::subscription(topic));
+    }
 
-    QSharedPointer<IqWampSubscription> subscription(const QString &topic) const;
-    QSharedPointer<IqWampSubscription> subscription(int id) const;
+    QSharedPointer<T> subscription(int id) const
+    {
+        return qSharedPointerCast<T>(IqWampSubscriptionsBase::subscription(id));
+    }
 
-    QSharedPointer<IqWampSubscription> create(const QString &topic, IqWampAbstractCallee *callee);
-
-    void remove(const IqWampAbstractCallee *callee);
-private:
-    int m_lastSubscriptionId;
-
-    QHash<int, QSharedPointer<IqWampSubscription> > m_subscriptionOnId;
-    QHash<QString, QSharedPointer<IqWampSubscription> > m_subscriptionOnTopic;
+    QSharedPointer<T> take(int id)
+    {
+        return qSharedPointerCast<T>(IqWampSubscriptionsBase::take(id));
+    }
 };
 
 

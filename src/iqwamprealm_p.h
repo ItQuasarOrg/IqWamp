@@ -24,10 +24,8 @@
 
 #include <QObject>
 #include <QSet>
-#include "iqwampregistration.h"
-#include "iqwampsubscription.h"
-#include "iqwampsubscriptions.h"
-#include "iqwampregistrations.h"
+#include "iqwampcalleesubscriptions.h"
+#include "iqwampcalleeregistrations.h"
 #include "iqwamprealm.h"
 
 class IqWampCallee;
@@ -42,8 +40,8 @@ public:
 
     void addClient(IqWampCallee *client);
 
-    IqWampSubscriptions *subscriptions() const;
-    IqWampRegistrations *registrations() const;
+    IqWampCalleeSubscriptions *subscriptions() const;
+    IqWampCalleeRegistrations *registrations() const;
 
     IqWampBroker *broker() const;
     IqWampDialer *dialer() const;
@@ -59,8 +57,8 @@ public:
 
     IqWampLocalClient *m_localClient;
 
-    IqWampSubscriptions *m_subscriptions;
-    IqWampRegistrations *m_registrations;
+    IqWampCalleeSubscriptions *m_subscriptions;
+    IqWampCalleeRegistrations *m_registrations;
 
     IqWampBroker *m_broker;
     IqWampDialer *m_dialer;

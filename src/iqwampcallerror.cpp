@@ -19,20 +19,36 @@
  **
  **********************************************************************************/
 
-#include "iqwampsubscription.h"
+#include "iqwampcallerror.h"
 
-IqWampSubscription::IqWampSubscription(int id, const QString &topic) :
-    m_topic(topic),
-    m_id(id)
+IqWampCallError::IqWampCallError(const QJsonObject &details,
+                                 const QString &error,
+                                 const QJsonArray &arguments,
+                                 const QJsonObject &argumentsKw):
+    m_details(details),
+    m_error(error),
+    m_arguments(arguments),
+    m_argumentsKw(argumentsKw)
 {
 }
 
-QString IqWampSubscription::topic() const
+QString IqWampCallError::error() const
 {
-    return m_topic;
+    return m_error;
 }
 
-int IqWampSubscription::id() const
+QJsonObject IqWampCallError::details() const
 {
-    return m_id;
+    return m_details;
 }
+
+QJsonArray IqWampCallError::arguments() const
+{
+    return m_arguments;
+}
+
+QJsonObject IqWampCallError::argumentsKw() const
+{
+    return m_argumentsKw;
+}
+

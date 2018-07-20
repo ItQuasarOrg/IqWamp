@@ -46,7 +46,7 @@ IqWampDialer::IqWampDialer(QObject *parent):
 {
 }
 
-int IqWampDialer::call(const QSharedPointer<IqWampRegistration> &registration,
+int IqWampDialer::call(const QSharedPointer<IqWampCalleeRegistration> &registration,
                        const QJsonArray &arguments,
                        const QJsonObject &argumentsKw,
                        IqWampAbstractCallee *sender)
@@ -69,7 +69,7 @@ int IqWampDialer::call(const QSharedPointer<IqWampRegistration> &registration,
                               "sendInvocation",
                               Qt::QueuedConnection,
                               Q_ARG(QPointer<IqWampAbstractCallee>, QPointer<IqWampAbstractCallee>(callee)),
-                              Q_ARG(const QSharedPointer<IqWampRegistration> &, registration),
+                              Q_ARG(const QSharedPointer<IqWampCalleeRegistration> &, registration),
                               Q_ARG(int, invocationId),
                               Q_ARG(const QJsonArray &, arguments),
                               Q_ARG(const QJsonObject &, argumentsKw));
@@ -77,7 +77,7 @@ int IqWampDialer::call(const QSharedPointer<IqWampRegistration> &registration,
     return invocationId;
 }
 
-void IqWampDialer::processYield(const QSharedPointer<IqWampRegistration> &registration,
+void IqWampDialer::processYield(const QSharedPointer<IqWampCalleeRegistration> &registration,
                                 const IqWampYieldResult &result)
 {
     if (!m_invocationFutures.contains(result.id()))
@@ -91,7 +91,7 @@ void IqWampDialer::processYield(const QSharedPointer<IqWampRegistration> &regist
 }
 
 void IqWampDialer::sendInvocation(QPointer<IqWampAbstractCallee> callee,
-                                  const QSharedPointer<IqWampRegistration> &registration,
+                                  const QSharedPointer<IqWampCalleeRegistration> &registration,
                                   int invocationId,
                                   const QJsonArray &arguments,
                                   const QJsonObject &argumentsKw)

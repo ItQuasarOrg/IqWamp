@@ -28,6 +28,83 @@ class IQWAMPSHARED_EXPORT IqWamp
 public:
     static const int ProtocolVersion = 1;
 
+    enum class ErrorMessage {
+        Type,
+        Call,
+        Request,
+        Details,
+        Error,
+        Arguments,
+        ArgumentsKw
+    };
+
+    enum class RegisterMessage {
+        Type,
+        Request,
+        Options,
+        Procedure
+    };
+
+    enum class UnRegisterMessage {
+        Type,
+        Request,
+        Registration
+    };
+
+    enum class CallMessage {
+        Type,
+        Request,
+        Options,
+        Procedure,
+        Arguments,
+        ArgumentsKw
+    };
+
+    enum class ResultMessage {
+        Type,
+        Request,
+        Details,
+        Arguments,
+        ArgumentsKw
+    };
+
+    enum class SubscribeMessage {
+        Type,
+        Request,
+        Options,
+        Topic
+    };
+
+    enum class UnSubscribeMessage {
+        Type,
+        Request,
+        Subscription
+    };
+
+    enum class SubscribedMessage {
+        Type,
+        Request,
+        Subscription
+    };
+
+    enum class PublishMessage {
+        Type,
+        Request,
+        Options,
+        Topic,
+        Arguments,
+        ArgumentsKw
+    };
+
+    enum class EventMessage {
+        Type,
+        Subscription,
+        Publication,
+        Details,
+        Arguments,
+        ArgumentsKw
+    };
+
     enum class MessageTypes {
         Hello = 1,
         Welcome = 2,

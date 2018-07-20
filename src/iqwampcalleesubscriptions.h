@@ -19,20 +19,25 @@
  **
  **********************************************************************************/
 
-#include "iqwampsubscription.h"
+#ifndef IQWAMPCALLEESUBSCRIPTIONS_H
+#define IQWAMPCALLEESUBSCRIPTIONS_H
 
-IqWampSubscription::IqWampSubscription(int id, const QString &topic) :
-    m_topic(topic),
-    m_id(id)
-{
-}
+#include "iqwampsubscriptions.h"
+#include "iqwampcalleesubscription.h"
 
-QString IqWampSubscription::topic() const
+class IqWampCalleeSubscriptions: public IqWampSubscriptions<IqWampCalleeSubscription>
 {
-    return m_topic;
-}
+public:
+    explicit IqWampCalleeSubscriptions(QObject *parent = 0);
 
-int IqWampSubscription::id() const
-{
-    return m_id;
-}
+    QSharedPointer<IqWampCalleeSubscription> create(const QString &topic, IqWampAbstractCallee *callee);
+
+    void remove(const IqWampAbstractCallee *callee);
+
+private:
+    int m_lastSubscriptionId;
+    QMultiHash<const IqWampAbstractCallee *, QSharedPointer<IqWampCalleeSubscription> > m_subscriptionOnCallee;
+};
+
+
+#endif //IQWAMPCALLEESUBSCRIPTIONS_H

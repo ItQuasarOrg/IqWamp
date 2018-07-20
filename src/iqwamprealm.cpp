@@ -46,13 +46,13 @@ IqWampLocalClient * IqWampRealm::localClient() const
     return d->m_localClient;
 }
 
-IqWampRegistrations *IqWampRealm::registrations() const
+IqWampCalleeRegistrations *IqWampRealm::registrations() const
 {
     Q_D(const IqWampRealm);
     return d->registrations();
 }
 
-IqWampSubscriptions *IqWampRealm::subscriptions() const
+IqWampCalleeSubscriptions *IqWampRealm::subscriptions() const
 {
     Q_D(const IqWampRealm);
     return d->subscriptions();
@@ -69,6 +69,3 @@ IqWampDialer *IqWampRealm::dialer() const
     Q_D(const IqWampRealm);
     return d->dialer();
 }
-
-
-

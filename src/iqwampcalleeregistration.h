@@ -19,20 +19,25 @@
  **
  **********************************************************************************/
 
-#include "iqwampsubscription.h"
+#ifndef IQWAMPCALLEEREGISTRATION_H
+#define IQWAMPCALLEEREGISTRATION_H
 
-IqWampSubscription::IqWampSubscription(int id, const QString &topic) :
-    m_topic(topic),
-    m_id(id)
-{
-}
+#include "iqwampregistration.h"
 
-QString IqWampSubscription::topic() const
-{
-    return m_topic;
-}
+class IqWampAbstractCallee;
 
-int IqWampSubscription::id() const
+class IqWampCalleeRegistration: public IqWampRegistration
 {
-    return m_id;
-}
+public:
+    explicit IqWampCalleeRegistration(int id, const QString &procedure, IqWampAbstractCallee *callee);
+
+public:
+    IqWampAbstractCallee *callee() const;
+
+private:
+    IqWampAbstractCallee *m_callee;
+};
+
+Q_DECLARE_METATYPE(QSharedPointer<IqWampCalleeRegistration>)
+
+#endif //IQWAMPCALLEEREGISTRATION_H

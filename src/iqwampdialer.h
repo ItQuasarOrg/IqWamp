@@ -27,7 +27,7 @@
 #include <QSharedPointer>
 #include <QHash>
 #include <QPointer>
-#include "iqwampregistration.h"
+#include "iqwampcalleeregistration.h"
 #include "iqwampyieldresult.h"
 
 class IqWampAbstractCallee;
@@ -38,12 +38,12 @@ class IqWampDialer : public QObject
 public:
     explicit IqWampDialer(QObject *parent = 0);
 
-    int call(const QSharedPointer<IqWampRegistration> &registration,
+    int call(const QSharedPointer<IqWampCalleeRegistration> &registration,
              const QJsonArray &arguments,
              const QJsonObject &argumentsKw,
              IqWampAbstractCallee *sender);
 
-    void processYield(const QSharedPointer<IqWampRegistration> &registration,
+    void processYield(const QSharedPointer<IqWampCalleeRegistration> &registration,
                       const IqWampYieldResult &result);
 
 private:
@@ -64,7 +64,7 @@ private:
     QHash<int, IqWampInvocationFuture> m_invocationFutures;
 
     Q_INVOKABLE void sendInvocation(QPointer<IqWampAbstractCallee> callee,
-                                    const QSharedPointer<IqWampRegistration> &registration,
+                                    const QSharedPointer<IqWampCalleeRegistration> &registration,
                                     int invocationId,
                                     const QJsonArray &arguments,
                                     const QJsonObject &argumentsKw);

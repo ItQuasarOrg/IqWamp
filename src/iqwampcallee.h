@@ -45,12 +45,12 @@ public:
 
     void closeConnection();
 
-    virtual void sendEvent(const QSharedPointer<IqWampSubscription> &subscription,
+    virtual void sendEvent(const QSharedPointer<IqWampCalleeSubscription> &subscription,
                            int publicationId,
                            const QJsonArray &arguments,
                            const QJsonObject &argumentsKw) Q_DECL_OVERRIDE;
 
-    virtual void sendInvocation(const QSharedPointer<IqWampRegistration> &registration,
+    virtual void sendInvocation(const QSharedPointer<IqWampCalleeRegistration> &registration,
                                 int invocationId,
                                 const QJsonArray &arguments,
                                 const QJsonObject &argumentsKw) Q_DECL_OVERRIDE;
@@ -82,6 +82,8 @@ private:
 
     void send(const QJsonArray &message);
     void sendError(IqWamp::MessageTypes requestType, const QJsonValue &request, const QString &error, const QJsonObject &details = QJsonObject());
+
+    void processHello(const QJsonArray &jsonMessage);
 
     void processSubscribe(const QJsonArray &jsonMessage);
     void sendSubscribed(const QJsonValue &request, int subscriptionId);

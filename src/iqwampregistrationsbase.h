@@ -19,23 +19,39 @@
  **
  **********************************************************************************/
 
-#ifndef IQWAMPSUBSCRIPTION_H
-#define IQWAMPSUBSCRIPTION_H
+#ifndef IQWAMPREGISTRATIONSBASE_H
+#define IQWAMPREGISTRATIONSBASE_H
 
 #include <QObject>
+#include <QHash>
+#include "iqwampabstractcallee.h"
+#include "iqwampregistration.h"
 
-class IqWampSubscription
+class IqWampRegistrationsBase : public QObject
 {
+    Q_OBJECT
 public:
-    explicit IqWampSubscription(int id, const QString &topic);
+    explicit IqWampRegistrationsBase(QObject *parent = 0);
 
-    QString topic() const;
+    bool hasRegistration(const QString &procedure) const;
+    bool hasRegistration(int id) const;
 
-    int id() const;
+    QSharedPointer<IqWampRegistration> registration(const QString &procedure) const;
+    QSharedPointer<IqWampRegistration> registration(int id) const;
+
+    void remove(int id);
+
+    QSharedPointer<IqWampRegistration> take(int id);
+
+protected:
+    bool addRegistration(QSharedPointer<IqWampRegistration> &&registration);
+
+    void removeRegistration(const QSharedPointer<IqWampRegistration> &registration);
 
 private:
-    QString m_topic;
-    int m_id;
+    QHash<QString, QSharedPointer<IqWampRegistration> > m_registrationsOnProcedure;
+    QHash<int, QSharedPointer<IqWampRegistration> > m_registrationsOnId;
 };
 
-#endif //IQWAMPSUBSCRIPTION_H
+
+#endif //IQWAMPREGISTRATIONSBASE_H

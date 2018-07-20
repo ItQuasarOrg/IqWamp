@@ -41,7 +41,7 @@ set (IqWamp_INCLUDE_DIRS ${IqWamp_INCLUDE_DIRS} CACHE STRING "IqWamp include dir
 
 #Set difinitions
 add_definitions (-DIQWAMP_LIBRARY)
-add_definitions (-DLIB_VERSION=${VERSION})
+add_definitions (-DLIB_VERSION="${VERSION}")
 
 #Set Windows res files compiler
 set (VERSIONINFO_RES_FILE "")

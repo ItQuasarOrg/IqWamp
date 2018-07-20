@@ -19,20 +19,21 @@
  **
  **********************************************************************************/
 
-#include "iqwampsubscription.h"
+#ifndef IQWAMPCALLBACKREGISTRATIONS_H
+#define IQWAMPCALLBACKREGISTRATIONS_H
 
-IqWampSubscription::IqWampSubscription(int id, const QString &topic) :
-    m_topic(topic),
-    m_id(id)
-{
-}
+#include "iqwampregistrations.h"
+#include "iqwampcallbackregistration.h"
 
-QString IqWampSubscription::topic() const
+class IqWampCallbackRegistrations: public IqWampRegistrations<IqWampCallbackRegistration>
 {
-    return m_topic;
-}
+public:
+    explicit IqWampCallbackRegistrations(QObject *parent = 0);
+    QSharedPointer<IqWampCallbackRegistration> create(int id,
+                                                      const QString &procedure,
+                                                      std::function<void(const QJsonArray &, const QJsonObject &)> callback,
+                                                      std::function<void(const IqWampCallError &error)> errorCallback);
+};
 
-int IqWampSubscription::id() const
-{
-    return m_id;
-}
+
+#endif //IQWAMPCALLBACKREGISTRATIONS_H

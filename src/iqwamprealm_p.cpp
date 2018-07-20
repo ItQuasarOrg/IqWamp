@@ -20,7 +20,6 @@
  **********************************************************************************/
 
 #include "iqwamprealm_p.h"
-#include "iqwamplocalclient.h"
 #include "iqwampcallee.h"
 
 IqWampRealmPrivate::IqWampRealmPrivate(IqWampRealm *parent):
@@ -28,8 +27,8 @@ IqWampRealmPrivate::IqWampRealmPrivate(IqWampRealm *parent):
     q_ptr(parent),
     m_name(""),
     m_localClient(new IqWampLocalClient(this, parent)),
-    m_subscriptions(new IqWampSubscriptions(this)),
-    m_registrations(new IqWampRegistrations(this)),
+    m_subscriptions(new IqWampCalleeSubscriptions(this)),
+    m_registrations(new IqWampCalleeRegistrations(this)),
     m_broker(new IqWampBroker(this)),
     m_dialer(new IqWampDialer(this))
 {
@@ -165,12 +164,12 @@ void IqWampRealmPrivate::addClient(IqWampCallee *client)
 //    sendEvent(subscription, publicationId, QJsonArray(), argumentsKw);
 //}
 
-IqWampSubscriptions *IqWampRealmPrivate::subscriptions() const
+IqWampCalleeSubscriptions *IqWampRealmPrivate::subscriptions() const
 {
     return m_subscriptions;
 }
 
-IqWampRegistrations *IqWampRealmPrivate::registrations() const
+IqWampCalleeRegistrations *IqWampRealmPrivate::registrations() const
 {
     return m_registrations;
 }

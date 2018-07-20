@@ -19,20 +19,35 @@
  **
  **********************************************************************************/
 
+#ifndef IQWAMPSUBSCRIPTIONSBASE_H
+#define IQWAMPSUBSCRIPTIONSBASE_H
+
+#include <QObject>
+#include <QHash>
+#include <QSharedPointer>
 #include "iqwampsubscription.h"
 
-IqWampSubscription::IqWampSubscription(int id, const QString &topic) :
-    m_topic(topic),
-    m_id(id)
+class IqWampSubscriptionsBase: public QObject
 {
-}
+    Q_OBJECT
+public:
+    explicit IqWampSubscriptionsBase(QObject *parent = 0);
 
-QString IqWampSubscription::topic() const
-{
-    return m_topic;
-}
+    QSharedPointer<IqWampSubscription> subscription(const QString &topic) const;
+    QSharedPointer<IqWampSubscription> subscription(int id) const;
 
-int IqWampSubscription::id() const
-{
-    return m_id;
-}
+    QSharedPointer<IqWampSubscription> take(int id);
+
+    bool hasSubscription(const QString &topic) const;
+    bool hasSubscription(int id) const;
+
+protected:
+    bool addSubscription(QSharedPointer<IqWampSubscription> &&subscription);
+    bool removeSubscription(QSharedPointer<IqWampSubscription> &subscription);
+
+private:
+    QHash<int, QSharedPointer<IqWampSubscription> > m_subscriptionOnId;
+    QHash<QString, QSharedPointer<IqWampSubscription> > m_subscriptionOnTopic;
+};
+
+#endif //IQWAMPSUBSCRIPTIONSBASE_H

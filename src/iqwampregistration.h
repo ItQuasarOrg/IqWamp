@@ -26,26 +26,19 @@
 #include <QMetaType>
 #include <QSharedPointer>
 
-class IqWampAbstractCallee;
-
 class IqWampRegistration
 {
 public:
-    explicit IqWampRegistration(int id, const QString &procedure, IqWampAbstractCallee *callee);
+    explicit IqWampRegistration(int id, const QString &procedure);
 
 public:
     QString procedure() const;
 
     int id() const;
 
-    IqWampAbstractCallee *callee() const;
-
 private:
     QString m_procedure;
     int m_id;
-    IqWampAbstractCallee *m_callee;
 };
-
-Q_DECLARE_METATYPE(QSharedPointer<IqWampRegistration>)
 
 #endif //IQWAMPREGISTRATION_H

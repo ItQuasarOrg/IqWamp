@@ -24,7 +24,7 @@
 
 #include <QObject>
 #include <QSharedPointer>
-#include "iqwampsubscription.h"
+#include "iqwampcalleesubscription.h"
 #include <QJsonArray>
 #include <QJsonObject>
 
@@ -34,7 +34,7 @@ class IqWampBroker : public QObject
 public:
     explicit IqWampBroker(QObject *parent = 0);
 
-    int publish(const QSharedPointer<IqWampSubscription> &subscription,
+    int publish(const QSharedPointer<IqWampCalleeSubscription> &subscription,
                 const QJsonArray &arguments,
                 const QJsonObject &argumentsKw);
 

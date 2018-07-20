@@ -19,20 +19,30 @@
  **
  **********************************************************************************/
 
-#include "iqwampsubscription.h"
+#ifndef IQMETEOGUI_IQWAMPCALLERROR_H
+#define IQMETEOGUI_IQWAMPCALLERROR_H
 
-IqWampSubscription::IqWampSubscription(int id, const QString &topic) :
-    m_topic(topic),
-    m_id(id)
-{
-}
+#include <QString>
+#include <QJsonArray>
+#include <QJsonObject>
 
-QString IqWampSubscription::topic() const
+class IqWampCallError
 {
-    return m_topic;
-}
+public:
+    IqWampCallError (const QJsonObject &details, const QString &error, const QJsonArray &arguments, const QJsonObject &argumentsKw);
 
-int IqWampSubscription::id() const
-{
-    return m_id;
-}
+public:
+    QString error() const;
+    QJsonObject details() const;
+    QJsonArray arguments() const;
+    QJsonObject argumentsKw() const;
+
+private:
+    QJsonObject m_details;
+    QString m_error;
+    QJsonArray m_arguments;
+    QJsonObject m_argumentsKw;
+};
+
+
+#endif //IQMETEOGUI_IQWAMPCALLERROR_H

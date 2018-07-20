@@ -19,20 +19,23 @@
  **
  **********************************************************************************/
 
-#include "iqwampsubscription.h"
+#ifndef IQWAMPJSONWEBSOCKET_H
+#define IQWAMPJSONWEBSOCKET_H
 
-IqWampSubscription::IqWampSubscription(int id, const QString &topic) :
-    m_topic(topic),
-    m_id(id)
-{
-}
+#include "iqwamp.h"
+#include <QWebSocket>
+#include <QJsonValue>
+#include <QJsonArray>
+#include <QJsonObject>
 
-QString IqWampSubscription::topic() const
+class IqWampJsonWebSocketHelper
 {
-    return m_topic;
-}
+public:
+    static void send(QWebSocket *socket, const QJsonArray &message);
+    static void sendError(QWebSocket *socket, IqWamp::MessageTypes requestType, const QJsonValue &request, const QString &error, const QJsonObject &details = QJsonObject());
+    static bool parseMessage(const QString &message, QJsonArray *jsonMessage, IqWamp::MessageTypes *messageType);
+    static QString messageTypeName(IqWamp::MessageTypes messageType);
+};
 
-int IqWampSubscription::id() const
-{
-    return m_id;
-}
+
+#endif //IQWAMPJSONWEBSOCKET_H

@@ -32,11 +32,11 @@ IqWampLocalClient::IqWampLocalClient(QObject *parent, IqWampRealm *realm) :
 
 bool IqWampLocalClient::publishEvent(const QString &topic, const QJsonArray &arguments, const QJsonObject &argumentsKw)
 {
-    IqWampSubscriptions *subscriptions = m_realm->subscriptions();
+    IqWampCalleeSubscriptions *subscriptions = m_realm->subscriptions();
     if (!subscriptions->hasSubscription(topic))
         return false;
 
-    QSharedPointer<IqWampSubscription> subscription = subscriptions->subscription(topic);
+    QSharedPointer<IqWampCalleeSubscription> subscription = subscriptions->subscription(topic);
 
     IqWampBroker *broker = m_realm->broker();
     broker->publish(subscription, arguments, argumentsKw);
@@ -53,7 +53,7 @@ bool IqWampLocalClient::registerProcedureCallback(const QString &procedure,
                                                   std::function<IqWampYieldResult(const QJsonArray &,
                                                                                   const QJsonObject &)> callback)
 {
-    IqWampRegistrations *registrations = m_realm->registrations();
+    IqWampCalleeRegistrations *registrations = m_realm->registrations();
     if (registrations->hasRegistration(procedure))
         return false;
 
@@ -65,4 +65,22 @@ bool IqWampLocalClient::registerProcedureCallback(const QString &procedure,
 
     return registrations->create(procedure, m_callee).data() != Q_NULLPTR;
 }
+
+bool IqWampLocalClient::subscribeToTopic(const QString &topic,
+                                         const QJsonObject &options,
+                                         std::function<void(const QJsonArray &, const QJsonObject &)> callback)
+{
+    return false;
+}
+
+bool IqWampLocalClient::callProcedure(const QString &procedure,
+                                      const QJsonArray &arguments,
+                                      const QJsonObject &argumentsKw,
+                                      std::function<void(const QJsonArray &, const QJsonObject &)> callback,
+                                      std::function<void(const IqWampCallError &error)> errorCallback)
+{
+    return false;
+}
+
+
 

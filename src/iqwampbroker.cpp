@@ -28,7 +28,7 @@ IqWampBroker::IqWampBroker(QObject *parent):
 {
 }
 
-int IqWampBroker::publish(const QSharedPointer<IqWampSubscription> &subscription,
+int IqWampBroker::publish(const QSharedPointer<IqWampCalleeSubscription> &subscription,
                           const QJsonArray &arguments,
                           const QJsonObject &argumentsKw)
 {
