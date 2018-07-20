@@ -74,6 +74,9 @@ private:
                            const QString &error,
                            const QJsonArray &arguments,
                            const QJsonObject &argumentsKw);
+
+    QHash<int, QSharedPointer<IqWampCallbackSubscription> > m_subscribedQuery;
+    void processEvent(const QJsonArray &jsonMessage);
 };
 
 IqWampClientPrivate::IqWampClientPrivate(IqWampClient *client) :
@@ -156,6 +159,23 @@ void IqWampClientPrivate::processTextMessage(const QString &message)
         case IqWamp::MessageTypes::Result: {
             processResult(messageArray);
         } break;
+
+//        case IqWamp::MessageTypes::UnSubscribe: {
+//        }
+//            break;
+//        case IqWamp::MessageTypes::Publish: {
+//            break;
+//        }
+//
+//        case IqWamp::MessageTypes::Register: {
+//            break;
+//        }
+//        case IqWamp::MessageTypes::UnRegister: {
+//            break;
+//        }
+//        case IqWamp::MessageTypes::Call: {
+//            break;
+//        }
 
         default: {
 #ifdef IQWAMP_DEBUG_MODE
@@ -318,6 +338,9 @@ bool IqWampClientPrivate::subscribeToTopic(const QString &topic,
 {
     int requestId = newMessageRequest();
     m_subscribedQuery->create(requestId, topic, callback);
+    QSharedPointer<IqWampCallbackSubscription> subscription = QSharedPointer<IqWampCallbackSubscription>::create(-1, topic, callback);
+    int requestId = newMessageRequest();
+    m_subscribedQuery[requestId] = subscription;
 
     QJsonArray message;
     message.append(static_cast<int>(IqWamp::MessageTypes::Subscribe));
@@ -353,6 +376,7 @@ void IqWampClientPrivate::processSubscribed(const QJsonArray &jsonMessage)
     int subscriptionId = jsonMessage.at(static_cast<int>(IqWamp::SubscribedMessage::Subscription)).toInt();
 
     if (!m_subscribedQuery->hasSubscription(requestId)) {
+    if (!m_subscribedQuery.contains(requestId)) {
 #ifdef IQWAMP_DEBUG_MODE
         qWarning() << IqWampJsonWebSocketHelper::messageTypeName(messageType) << "message with id =" << requestId << "is not expected!";
 #endif
@@ -360,6 +384,7 @@ void IqWampClientPrivate::processSubscribed(const QJsonArray &jsonMessage)
     }
 
     QSharedPointer<IqWampCallbackSubscription> subscription = m_subscribedQuery->take(requestId);
+    QSharedPointer<IqWampCallbackSubscription> subscription = m_subscribedQuery.take(requestId);
     m_subscriptions->create(subscriptionId, subscription->topic(), subscription->callback());
 }
 
@@ -449,6 +474,7 @@ bool IqWampClientPrivate::callProcedure(const QString &procedure,
 
     return true;
 }
+
 void IqWampClientPrivate::processCallError(int requestId,
                                            const QJsonObject &details,
                                            const QString &error,

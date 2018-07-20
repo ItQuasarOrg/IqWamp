@@ -72,8 +72,3 @@ bool IqWampSubscriptionsBase::removeSubscription(QSharedPointer<IqWampSubscripti
     return true;
 }
 
-
-
-
-
-

@@ -51,4 +51,3 @@ QJsonObject IqWampCallError::argumentsKw() const
 {
     return m_argumentsKw;
 }
-

@@ -40,6 +40,8 @@ public:
 private:
     QJsonObject m_details;
     QString m_error;
+    QString m_uri;
+    QJsonObject m_details;
     QJsonArray m_arguments;
     QJsonObject m_argumentsKw;
 };

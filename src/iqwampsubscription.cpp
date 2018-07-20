@@ -22,8 +22,13 @@
 #include "iqwampsubscription.h"
 
 IqWampSubscription::IqWampSubscription(int id, const QString &topic) :
+<<<<<<< HEAD
     m_topic(topic),
     m_id(id)
+=======
+    m_id(id),
+    m_topic(topic)
+>>>>>>> 47d4c027f824f401bb90eb267e7b023187f9e899
 {
 }
 

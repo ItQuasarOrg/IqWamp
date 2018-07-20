@@ -23,6 +23,8 @@
 #define IQWAMPSUBSCRIPTIONS_H
 
 #include "iqwampsubscriptionsbase.h"
+#include "iqwampabstractcallee.h"
+#include "iqwampcalleesubscription.h"
 
 template <typename T>
 class IqWampSubscriptions : public IqWampSubscriptionsBase

@@ -35,7 +35,6 @@ public:
 
     QSharedPointer<IqWampSubscription> subscription(const QString &topic) const;
     QSharedPointer<IqWampSubscription> subscription(int id) const;
-
     QSharedPointer<IqWampSubscription> take(int id);
 
     bool hasSubscription(const QString &topic) const;

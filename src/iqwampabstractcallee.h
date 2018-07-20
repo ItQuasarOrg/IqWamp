@@ -26,7 +26,7 @@
 #include <QJsonObject>
 #include <QSharedPointer>
 #include "iqwampcalleesubscription.h"
-#include "iqwampcalleeregistration.h"
+#include "iqwampregistration.h"
 #include "iqwamp.h"
 
 class IqWampAbstractCallee : public QObject

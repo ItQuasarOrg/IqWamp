@@ -26,6 +26,8 @@
 #include <QSet>
 #include "iqwampcalleesubscriptions.h"
 #include "iqwampcalleeregistrations.h"
+#include "iqwampcalleesubscriptions.h"
+#include "iqwampregistrations.h"
 #include "iqwamprealm.h"
 
 class IqWampCallee;
